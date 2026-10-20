@@ -2,7 +2,7 @@
 #
 # Prerequisites:
 #   - nuget.org -> Trusted Publishing -> add a policy for:
-#       Repository Owner: TairuiQu
+#       Repository Owner: TaiRuiQu
 #       Repository:       anthropic-sdk-csharp-aot
 #       Workflow File:    publish-nuget.yml
 #       Environment:      (leave empty; this workflow does not use a GitHub environment)

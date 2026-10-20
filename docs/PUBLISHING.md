@@ -7,11 +7,12 @@ official `Anthropic` IDs, which are owned by Anthropic.
 
 ### 1. nuget.org trusted publishing policy
 
-Sign in to nuget.org, open **Trusted Publishing**, and add a policy:
+Sign in to nuget.org, open
+[Trusted Publishing](https://www.nuget.org/account/trusted-publishing), and add a policy:
 
 | Field           | Value                          |
 | --------------- | ------------------------------ |
-| Repository Owner | `TairuiQu`                    |
+| Repository Owner | `TaiRuiQu`                    |
 | Repository       | `anthropic-sdk-csharp-aot`    |
 | Workflow File    | `publish-nuget.yml`           |
 | Environment      | leave empty                   |
