@@ -14,6 +14,7 @@ using Anthropic.Core;
 using Anthropic.Models.Beta.Files;
 using Anthropic.Models.Beta.Messages;
 using Anthropic.Services.Beta;
+using JsonSerializer = Anthropic.JsonSerializer;
 
 #pragma warning disable MEAI001 // [Experimental] APIs in Microsoft.Extensions.AI
 #pragma warning disable IDE0130 // Namespace does not match folder structure

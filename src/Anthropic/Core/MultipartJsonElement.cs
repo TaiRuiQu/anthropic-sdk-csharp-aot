@@ -181,7 +181,9 @@ public static class MultipartJsonSerializer
     > MultipartSerializerOptionsCache = new(() => new());
 
     static readonly JsonSerializerOptions DefaultMultipartSerializerOptions =
-        MultipartSerializerOptions(new());
+        MultipartSerializerOptions(
+            new() { TypeInfoResolver = AnthropicJsonSerializerContext.Default }
+        );
 
     static JsonSerializerOptions MultipartSerializerOptions(JsonSerializerOptions? options = null)
     {

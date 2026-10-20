@@ -94,7 +94,11 @@ public abstract class SseAggregator<TMessage, TResult>
     private static Dictionary<FilterResult, IList<TMessage>> NewMessages()
     {
         Dictionary<FilterResult, IList<TMessage>> messages = [];
+#if NET
+        foreach (FilterResult item in Enum.GetValues<FilterResult>())
+#else
         foreach (FilterResult item in Enum.GetValues(typeof(FilterResult)))
+#endif
         {
             messages[item] = [];
         }

@@ -25,7 +25,9 @@
     <IncludeSymbols>true</IncludeSymbols>
     <DebugType>embedded</DebugType>
 
-    <TargetFrameworks>net8.0;net9.0;netstandard2.0</TargetFrameworks>
+    <!-- netstandard2.0 has no Native AOT support, so an AOT build targets .NET 10 only. -->
+    <TargetFrameworks Condition="'$(PublishAot)' != 'true'">net8.0;net9.0;net10.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(PublishAot)' == 'true'">net10.0</TargetFrameworks>
     <LangVersion>12</LangVersion>
     <Configurations>Debug;Release</Configurations>
     <BuildPackage>true</BuildPackage>

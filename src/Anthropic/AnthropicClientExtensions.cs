@@ -19,6 +19,7 @@ using Anthropic.Core;
 using Anthropic.Models.Files;
 using Anthropic.Models.Messages;
 using Anthropic.Services;
+using JsonSerializer = Anthropic.JsonSerializer;
 
 #pragma warning disable MEAI001 // [Experimental] APIs in Microsoft.Extensions.AI
 #pragma warning disable IDE0130 // Namespace does not match folder structure
@@ -179,6 +180,7 @@ public static class AnthropicClientExtensions
     private static readonly JsonSerializerOptions s_relaxedJsonOptions = new()
     {
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        TypeInfoResolver = AnthropicJsonSerializerContext.Default,
     };
 
     /// <summary>Supported string formats for Anthropic structured outputs.</summary>

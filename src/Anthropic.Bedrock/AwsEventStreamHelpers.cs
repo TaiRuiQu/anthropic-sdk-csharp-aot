@@ -17,7 +17,11 @@ namespace Anthropic.Bedrock;
 /// </remarks>
 internal static class AwsEventStreamHelpers
 {
-    private static readonly JsonSerializerOptions? _jsonOptions = new() { WriteIndented = false };
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        WriteIndented = false,
+        TypeInfoResolver = AnthropicJsonSerializerContext.Default,
+    };
 
     /// <returns>The next SSE event, or <c>null</c> at the end of the stream.</returns>
     public static async Task<string?> ReadStreamMessage(
@@ -122,7 +126,7 @@ internal static class AwsEventStreamHelpers
                 headers.TryGetValue(":exception-type", out var exceptionType);
                 var payload = await JsonSerializer
                     .DeserializeAsync<JsonObject>(
-                        PipeReader.Create(bodyData),
+                        PipeReader.Create(bodyData).AsStream(),
                         _jsonOptions,
                         cancellationToken
                     )
@@ -141,7 +145,7 @@ internal static class AwsEventStreamHelpers
 
         var eventLine = await JsonSerializer
             .DeserializeAsync<JsonObject>(
-                PipeReader.Create(bodyData),
+                PipeReader.Create(bodyData).AsStream(),
                 _jsonOptions,
                 cancellationToken
             )
@@ -154,9 +158,9 @@ internal static class AwsEventStreamHelpers
 
         var parsedEvent = await JsonSerializer
             .DeserializeAsync<JsonObject>(
-                PipeReader.Create(
-                    new ReadOnlySequence<byte>(Convert.FromBase64String(eventContents))
-                ),
+                PipeReader
+                    .Create(new ReadOnlySequence<byte>(Convert.FromBase64String(eventContents)))
+                    .AsStream(),
                 _jsonOptions,
                 cancellationToken
             )

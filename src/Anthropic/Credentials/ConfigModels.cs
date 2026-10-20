@@ -20,6 +20,7 @@ internal sealed class ConfigFile
 
     internal static readonly JsonSerializerOptions JsonOptions = new()
     {
+        TypeInfoResolver = AnthropicJsonSerializerContext.Default,
         PropertyNameCaseInsensitive = true,
     };
 }
@@ -80,6 +81,7 @@ internal sealed class CredentialsFileData
 
     internal static readonly JsonSerializerOptions JsonOptions = new()
     {
+        TypeInfoResolver = AnthropicJsonSerializerContext.Default,
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
 #if NET

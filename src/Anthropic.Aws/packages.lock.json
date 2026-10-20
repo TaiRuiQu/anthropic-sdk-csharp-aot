@@ -181,6 +181,55 @@
         }
       }
     },
+    "net10.0": {
+      "AWSSDK.Core": {
+        "type": "Direct",
+        "requested": "[4.0.3.3, )",
+        "resolved": "4.0.3.3",
+        "contentHash": "YQv10JuxnciWh0QwnkarSbge4gXQV1qTURf5jkBjNUH/3jYS9QrbxopA4TK1qdjfOfP37tqiJkLSrRRNqX81aw=="
+      },
+      "AWSSDK.SSO": {
+        "type": "Direct",
+        "requested": "[4.0.2.5, )",
+        "resolved": "4.0.2.5",
+        "contentHash": "7K1lxmP+kQlIXvjAXomBXUycYZk2sNP7JCAgDbNsHLzEDHLWimghbrbdn4Dt2CU6koRYFvjWaINlHemqMVyPBA==",
+        "dependencies": {
+          "AWSSDK.Core": "[4.0.3.3, 5.0.0)"
+        }
+      },
+      "AWSSDK.SSOOIDC": {
+        "type": "Direct",
+        "requested": "[4.0.3.6, )",
+        "resolved": "4.0.3.6",
+        "contentHash": "7B1R5g+7e4ctGBdH6TEdKJKQAHYj10qVnM22CEOTVN+jsDc5YltPptaDVZbZIxNtbsKknW9kDzAqpph9r5zgSA==",
+        "dependencies": {
+          "AWSSDK.Core": "[4.0.3.3, 5.0.0)"
+        }
+      },
+      "Microsoft.Bcl.Memory": {
+        "type": "Direct",
+        "requested": "[10.0.4, )",
+        "resolved": "10.0.4",
+        "contentHash": "ayoY21xuhuY6cYZkG92bdYsulmJlLS558b3Ez1rWFkBZ+QIUSeAlALzT1UK+ZZeEmhzFWjemG4bBcMRhdiHntA=="
+      },
+      "Microsoft.NET.ILLink.Tasks": {
+        "type": "Direct",
+        "requested": "[10.0.13, )",
+        "resolved": "10.0.13",
+        "contentHash": "40yrBMsLEcjixBR4G+FiUaBPvxXIPSKJ2OgSrbOZcmSDBda4Sb0k7BWrfDpIvn3IvvDzwOL/tEPa6gDQfh6aRw=="
+      },
+      "Microsoft.Extensions.AI.Abstractions": {
+        "type": "Transitive",
+        "resolved": "10.5.1",
+        "contentHash": "nB0l3IlsVbNeUxsE7nZNb9GY8rP1OSeqpj0pseORPejt474HNKEauTWTLdSJPkSvPlRMxowZNMo6nyp7APAiSg=="
+      },
+      "anthropic": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.AI.Abstractions": "[10.5.1, )"
+        }
+      }
+    },
     "net8.0": {
       "AWSSDK.Core": {
         "type": "Direct",
@@ -211,6 +260,12 @@
         "requested": "[10.0.4, )",
         "resolved": "10.0.4",
         "contentHash": "ayoY21xuhuY6cYZkG92bdYsulmJlLS558b3Ez1rWFkBZ+QIUSeAlALzT1UK+ZZeEmhzFWjemG4bBcMRhdiHntA=="
+      },
+      "Microsoft.NET.ILLink.Tasks": {
+        "type": "Direct",
+        "requested": "[8.0.32, )",
+        "resolved": "8.0.32",
+        "contentHash": "FQXkG87JK9+SEbF6vRcWmevk0Pjqgehhz+9e1hHATDh7U8EvgmVQQcEUJTXj1IKi8VqLrdi/c1QHOpVjZcd9ng=="
       },
       "Microsoft.Extensions.AI.Abstractions": {
         "type": "Transitive",
@@ -283,6 +338,12 @@
         "requested": "[10.0.4, )",
         "resolved": "10.0.4",
         "contentHash": "ayoY21xuhuY6cYZkG92bdYsulmJlLS558b3Ez1rWFkBZ+QIUSeAlALzT1UK+ZZeEmhzFWjemG4bBcMRhdiHntA=="
+      },
+      "Microsoft.NET.ILLink.Tasks": {
+        "type": "Direct",
+        "requested": "[9.0.21, )",
+        "resolved": "9.0.21",
+        "contentHash": "ryionTSVk0ZU5/gW6r6Kh6LxvUzuF8HIcO0CLHoHhn7ZHZLbpGGYSe3duYzaNTtZK/AOQfqtYLUEW5LfbhSw3w=="
       },
       "Microsoft.Extensions.AI.Abstractions": {
         "type": "Transitive",

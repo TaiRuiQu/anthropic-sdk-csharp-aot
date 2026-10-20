@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Text.Json;
 using Anthropic.Exceptions;
 using Anthropic.Models;
@@ -84,9 +85,16 @@ public abstract record class ModelBase
 
     internal static readonly JsonSerializerOptions SerializerOptions = new()
     {
+        TypeInfoResolver = AnthropicJsonSerializerContext.Default,
         Converters =
         {
-            new FrozenDictionaryConverterFactory(),
+            // Closed instantiations are registered explicitly because Native AOT cannot create the
+            // converter through reflection.
+            new FrozenDictionaryConverter<string, JsonElement>(),
+            new FrozenDictionaryConverter<string, MultipartJsonElement>(),
+            new FrozenDictionaryConverter<string, string>(),
+            new FrozenDictionaryConverter<string, Messages::BetaMcpToolConfig>(),
+            new FrozenDictionaryConverter<string, UserProfiles::BetaUserProfileTrustGrant>(),
             new ApiEnumConverter<string, ErrorType>(),
             new ApiEnumConverter<string, MediaType>(),
             new ApiEnumConverter<string, BashCodeExecutionToolResultErrorCode>(),

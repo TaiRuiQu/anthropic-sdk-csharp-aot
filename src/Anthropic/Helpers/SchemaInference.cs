@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -16,6 +17,16 @@ namespace Anthropic.Helpers;
 /// </summary>
 internal static class SchemaInference
 {
+    [UnconditionalSuppressMessage(
+        "Trimming",
+        "IL2026:RequiresUnreferencedCode",
+        Justification = "Schema generation for caller-supplied types is inherently reflection-based."
+    )]
+    [UnconditionalSuppressMessage(
+        "AOT",
+        "IL3050:RequiresDynamicCode",
+        Justification = "Schema generation for caller-supplied types is inherently reflection-based."
+    )]
     static readonly JsonSerializerOptions SchemaOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -133,7 +144,7 @@ internal static class SchemaInference
 
                 // Non-nullable properties and [JsonRequired] properties are required
                 if (!wasNullable || existingRequired.Contains(kvp.Key))
-                    required.Add(JsonValue.Create(kvp.Key));
+                    required.Add((JsonNode?)JsonValue.Create(kvp.Key));
             }
 
             if (required.Count > 0)

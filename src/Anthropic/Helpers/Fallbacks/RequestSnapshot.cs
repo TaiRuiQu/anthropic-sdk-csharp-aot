@@ -230,9 +230,11 @@ internal sealed class RequestSnapshot
             JsonArray content = [];
             foreach (var block in continuation)
             {
-                content.Add(block.DeepClone());
+                content.Add((JsonNode?)block.DeepClone());
             }
-            messages.Add(new JsonObject { ["role"] = "assistant", ["content"] = content });
+            messages.Add(
+                (JsonNode)new JsonObject { ["role"] = "assistant", ["content"] = content }
+            );
         }
 
         return SendEntry(send, index, body, abandoned, cancellationToken);

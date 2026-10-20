@@ -84,7 +84,7 @@ public class AnthropicExceptionFactory
                 && typeElement.ValueKind == JsonValueKind.String
             )
             {
-                var result = typeElement.Deserialize<ErrorType>();
+                var result = JsonSerializer.Deserialize<ErrorType>(typeElement);
                 return Enum.IsDefined(typeof(ErrorType), result) ? result : null;
             }
         }

@@ -36,6 +36,7 @@ static class Content
     internal static readonly JsonSerializerOptions JsonOptions = new()
     {
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        TypeInfoResolver = AnthropicJsonSerializerContext.Default,
     };
 
     /// <summary>
@@ -157,12 +158,12 @@ static class Content
         switch (content)
         {
             case { ValueKind: JsonValueKind.String } text:
-                parts.Add(new JsonObject { ["type"] = "text", ["content"] = Text(text) });
+                parts.Add((JsonNode)new JsonObject { ["type"] = "text", ["content"] = Text(text) });
                 break;
             case { ValueKind: JsonValueKind.Array } blocks:
                 foreach (var block in blocks.EnumerateArray())
                 {
-                    parts.Add(BlockPart(block));
+                    parts.Add((JsonNode?)BlockPart(block));
                 }
                 break;
         }
@@ -183,7 +184,7 @@ static class Content
         switch (content)
         {
             case { ValueKind: JsonValueKind.String } text:
-                blocks.Add(new JsonObject { ["type"] = "text", ["text"] = Text(text) });
+                blocks.Add((JsonNode)new JsonObject { ["type"] = "text", ["text"] = Text(text) });
                 break;
             case { ValueKind: JsonValueKind.Array } list:
                 foreach (var block in list.EnumerateArray())

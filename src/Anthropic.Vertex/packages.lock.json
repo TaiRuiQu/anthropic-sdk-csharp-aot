@@ -195,6 +195,79 @@
         }
       }
     },
+    "net10.0": {
+      "Google.Apis.Oauth2.v2": {
+        "type": "Direct",
+        "requested": "[1.68.0.1869, )",
+        "resolved": "1.68.0.1869",
+        "contentHash": "6gf5dpi6d+sezfRwqEfA9lDfP7OT5ZrQFgiO1r2jDS8rkMpxaS6/mpTsyW/EgcXr8R4NEHIbAN4FvZClRq0+Zg==",
+        "dependencies": {
+          "Google.Apis": "1.68.0",
+          "Google.Apis.Auth": "1.68.0"
+        }
+      },
+      "Microsoft.NET.ILLink.Tasks": {
+        "type": "Direct",
+        "requested": "[10.0.13, )",
+        "resolved": "10.0.13",
+        "contentHash": "40yrBMsLEcjixBR4G+FiUaBPvxXIPSKJ2OgSrbOZcmSDBda4Sb0k7BWrfDpIvn3IvvDzwOL/tEPa6gDQfh6aRw=="
+      },
+      "Google.Apis": {
+        "type": "Transitive",
+        "resolved": "1.68.0",
+        "contentHash": "s2MymhdpH+ybZNBeZ2J5uFgFHApBp+QXf9FjZSdM1lk/vx5VqIknJwnaWiuAzXxPrLEkesX0Q+UsiWn39yZ9zw==",
+        "dependencies": {
+          "Google.Apis.Core": "1.68.0"
+        }
+      },
+      "Google.Apis.Auth": {
+        "type": "Transitive",
+        "resolved": "1.68.0",
+        "contentHash": "hFx8Qz5bZ4w0hpnn4tSmZaaFpjAMsgVElZ+ZgVLUZ2r9i+AKcoVgwiNfv1pruNS5cCvpXqhKECbruBCfRezPHA==",
+        "dependencies": {
+          "Google.Apis": "1.68.0",
+          "Google.Apis.Core": "1.68.0",
+          "System.Management": "7.0.2"
+        }
+      },
+      "Google.Apis.Core": {
+        "type": "Transitive",
+        "resolved": "1.68.0",
+        "contentHash": "pAqwa6pfu53UXCR2b7A/PAPXeuVg6L1OFw38WckN27NU2+mf+KTjoEg2YGv/f0UyKxzz7DxF1urOTKg/6dTP9g==",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.3"
+        }
+      },
+      "Microsoft.Extensions.AI.Abstractions": {
+        "type": "Transitive",
+        "resolved": "10.5.1",
+        "contentHash": "nB0l3IlsVbNeUxsE7nZNb9GY8rP1OSeqpj0pseORPejt474HNKEauTWTLdSJPkSvPlRMxowZNMo6nyp7APAiSg=="
+      },
+      "Newtonsoft.Json": {
+        "type": "Transitive",
+        "resolved": "13.0.3",
+        "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
+      },
+      "System.CodeDom": {
+        "type": "Transitive",
+        "resolved": "7.0.0",
+        "contentHash": "GLltyqEsE5/3IE+zYRP5sNa1l44qKl9v+bfdMcwg+M9qnQf47wK3H0SUR/T+3N4JEQXF3vV4CSuuo0rsg+nq2A=="
+      },
+      "System.Management": {
+        "type": "Transitive",
+        "resolved": "7.0.2",
+        "contentHash": "/qEUN91mP/MUQmJnM5y5BdT7ZoPuVrtxnFlbJ8a3kBJGhe2wCzBfnPFtK2wTtEEcf3DMGR9J00GZZfg6HRI6yA==",
+        "dependencies": {
+          "System.CodeDom": "7.0.0"
+        }
+      },
+      "anthropic": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.AI.Abstractions": "[10.5.1, )"
+        }
+      }
+    },
     "net8.0": {
       "Google.Apis.Oauth2.v2": {
         "type": "Direct",
@@ -205,6 +278,12 @@
           "Google.Apis": "1.68.0",
           "Google.Apis.Auth": "1.68.0"
         }
+      },
+      "Microsoft.NET.ILLink.Tasks": {
+        "type": "Direct",
+        "requested": "[8.0.32, )",
+        "resolved": "8.0.32",
+        "contentHash": "FQXkG87JK9+SEbF6vRcWmevk0Pjqgehhz+9e1hHATDh7U8EvgmVQQcEUJTXj1IKi8VqLrdi/c1QHOpVjZcd9ng=="
       },
       "Google.Apis": {
         "type": "Transitive",
@@ -301,6 +380,12 @@
           "Google.Apis": "1.68.0",
           "Google.Apis.Auth": "1.68.0"
         }
+      },
+      "Microsoft.NET.ILLink.Tasks": {
+        "type": "Direct",
+        "requested": "[9.0.21, )",
+        "resolved": "9.0.21",
+        "contentHash": "ryionTSVk0ZU5/gW6r6Kh6LxvUzuF8HIcO0CLHoHhn7ZHZLbpGGYSe3duYzaNTtZK/AOQfqtYLUEW5LfbhSw3w=="
       },
       "Google.Apis": {
         "type": "Transitive",

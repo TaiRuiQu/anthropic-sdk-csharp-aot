@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+#pragma warning disable CA1846 // The span overload isn't available on net472.
 namespace Anthropic.Tests;
 
 /// <summary>
@@ -213,5 +214,9 @@ sealed class SigV4VerifyingHandler : HttpMessageHandler
     }
 
     static string Hex(byte[] bytes) =>
+#if NET9_0_OR_GREATER
+        Convert.ToHexStringLower(bytes);
+#else
         BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
+#endif
 }

@@ -175,7 +175,9 @@ internal static class WireShape
     {
         var usage = Backfill(@event["usage"] as JsonObject, startUsage);
         var chain = CloneAll(priorIterations);
-        chain.Add(refused ? MessageIteration(model, usage) : FallbackIteration(model, usage));
+        chain.Add(
+            (JsonNode)(refused ? MessageIteration(model, usage) : FallbackIteration(model, usage))
+        );
         usage["iterations"] = chain;
         @event["usage"] = usage;
     }

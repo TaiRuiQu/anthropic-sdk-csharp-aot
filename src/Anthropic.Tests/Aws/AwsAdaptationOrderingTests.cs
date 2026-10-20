@@ -123,7 +123,11 @@ public class AwsAdaptationOrderingTests
         using var sha256 = SHA256.Create();
         var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(MutatedBody));
 #endif
+#if NET9_0_OR_GREATER
+        var expectedHash = Convert.ToHexStringLower(hash);
+#else
         var expectedHash = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+#endif
         Assert.Equal(expectedHash, signedPayloadHash);
     }
 }

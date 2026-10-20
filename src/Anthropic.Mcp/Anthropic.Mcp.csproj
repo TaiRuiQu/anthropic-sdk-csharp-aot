@@ -7,6 +7,7 @@
     <AssemblyTitle>Anthropic MCP Helpers</AssemblyTitle>
     <Description>Helpers for using Model Context Protocol (MCP) servers with the Anthropic .NET SDK.</Description>
     <PackageIcon>logo.png</PackageIcon>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\logo.png" Pack="true" PackagePath="\" />

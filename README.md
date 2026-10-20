@@ -49,6 +49,20 @@ Console.WriteLine(message);
 
 .NET Standard 2.0+
 
+## Native AOT
+
+The `net8.0`, `net9.0`, and `net10.0` builds are annotated with `IsAotCompatible` and use a
+source-generated `System.Text.Json` context, so they can be published with Native AOT. The
+`examples/AotExample` project is a runnable smoke test:
+
+```bash
+dotnet publish examples/AotExample/AotExample.csproj -c Release
+```
+
+Schema generation for caller-defined structured-output types
+(`StructuredOutput.CreateJsonFormat<T>` and friends) still uses reflection, so it is not
+AOT-safe unless those types are registered in a source-generated `JsonSerializerContext`.
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md).

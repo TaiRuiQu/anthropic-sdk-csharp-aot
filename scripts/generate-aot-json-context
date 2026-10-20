@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Regenerating the Native AOT JSON serializer context"
+dotnet run \
+    --project scripts/AotJsonContextGenerator/AotJsonContextGenerator.csproj \
+    -c Release \
+    -- src/Anthropic/Core/AnthropicJsonSerializerContext.g.cs "${1:-}"
+
+echo "==> Formatting the generated context"
+dotnet csharpier format src/Anthropic/Core/AnthropicJsonSerializerContext.g.cs

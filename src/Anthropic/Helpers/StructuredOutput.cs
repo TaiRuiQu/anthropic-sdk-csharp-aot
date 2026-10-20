@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -81,6 +82,16 @@ public static class StructuredOutput
         return result;
     }
 
+    [UnconditionalSuppressMessage(
+        "Trimming",
+        "IL2026:RequiresUnreferencedCode",
+        Justification = "Deserialization of caller-supplied model types is reflection-based."
+    )]
+    [UnconditionalSuppressMessage(
+        "AOT",
+        "IL3050:RequiresDynamicCode",
+        Justification = "Deserialization of caller-supplied model types is reflection-based."
+    )]
     static readonly JsonSerializerOptions DeserializeOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

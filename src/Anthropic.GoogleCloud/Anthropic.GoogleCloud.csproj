@@ -6,6 +6,7 @@
 
     <PackageId>Anthropic.GoogleCloud</PackageId>
     <Description>The official .NET library for Claude Platform on Google Cloud.</Description>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
   </PropertyGroup>
 
   <ItemGroup>
