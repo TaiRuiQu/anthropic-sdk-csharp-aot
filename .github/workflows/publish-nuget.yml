@@ -57,13 +57,10 @@ jobs:
         with:
           user: ${{ vars.NUGET_USER || 'TairuiQu' }}
 
-      - name: Publish packages and symbols to nuget.org
+      - name: Publish packages to nuget.org
         run: |
           shopt -s nullglob
-          packages=(
-            artifacts/packages/*.nupkg
-            artifacts/packages/*.snupkg
-          )
+          packages=(artifacts/packages/*.nupkg)
           if [ ${#packages[@]} -eq 0 ]; then
             echo "No packages were produced."
             exit 1

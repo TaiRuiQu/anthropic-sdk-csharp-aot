@@ -57,8 +57,8 @@ new version for every attempt (for example `12.58.0-aot.2`).
 dotnet pack Anthropic.sln -c Release -o artifacts/packages
 ```
 
-The output contains `.nupkg` files and matching `.snupkg` symbol packages. To test the package
-before publishing:
+The output contains `.nupkg` files. PDBs are embedded in the assemblies, so no separate symbol
+package is produced. To test the package before publishing:
 
 ```sh
 dotnet add package TairuiQu.Anthropic.Aot --version <version> --source artifacts/packages

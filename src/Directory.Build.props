@@ -22,8 +22,8 @@
     <!-- Source link -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <!-- PDBs are embedded in the assemblies, so there is no separate symbol package to publish. -->
+    <IncludeSymbols>false</IncludeSymbols>
     <DebugType>embedded</DebugType>
 
     <!-- netstandard2.0 has no Native AOT support, so an AOT build targets .NET 10 only. -->
