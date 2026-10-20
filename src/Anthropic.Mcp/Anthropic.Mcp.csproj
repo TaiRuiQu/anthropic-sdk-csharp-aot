@@ -2,10 +2,10 @@
   <PropertyGroup>
     <RootNamespace>Anthropic.Helpers.Beta.Mcp</RootNamespace>
     <AssemblyName>Anthropic.Mcp</AssemblyName>
-    <PackageId>Anthropic.Mcp</PackageId>
-    <VersionPrefix>0.1.0</VersionPrefix>
+    <PackageId>TairuiQu.Anthropic.Mcp</PackageId>
+    <VersionPrefix>0.1.0-aot.1</VersionPrefix>
     <AssemblyTitle>Anthropic MCP Helpers</AssemblyTitle>
-    <Description>Helpers for using Model Context Protocol (MCP) servers with the Anthropic .NET SDK.</Description>
+    <Description>Unofficial Native AOT-enabled fork of the Anthropic MCP helpers. Not affiliated with or endorsed by Anthropic.</Description>
     <PackageIcon>logo.png</PackageIcon>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
   </PropertyGroup>

@@ -1,7 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PackageId>Anthropic.Aws</PackageId>
+    <PackageId>TairuiQu.Anthropic.Aws</PackageId>
+    <VersionPrefix>0.6.0-aot.1</VersionPrefix>
+    <Description>Unofficial Native AOT-enabled fork of the Anthropic AWS client. Not affiliated with or endorsed by Anthropic.</Description>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
   </PropertyGroup>
 

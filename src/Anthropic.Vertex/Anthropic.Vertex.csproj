@@ -4,7 +4,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <PackageId>Anthropic.Vertex</PackageId>
+    <PackageId>TairuiQu.Anthropic.Vertex</PackageId>
+    <VersionPrefix>0.6.0-aot.1</VersionPrefix>
+    <Description>Unofficial Native AOT-enabled fork of the Anthropic Vertex client. Not affiliated with or endorsed by Anthropic.</Description>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
   </PropertyGroup>
 

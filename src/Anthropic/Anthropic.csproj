@@ -3,10 +3,10 @@
     <!-- Metadata -->
     <AssemblyTitle>Anthropic C#</AssemblyTitle>
     <AssemblyName>Anthropic</AssemblyName>
-    <PackageId>Anthropic</PackageId>
-    <VersionPrefix>12.58.0</VersionPrefix>
+    <PackageId>TairuiQu.Anthropic.Aot</PackageId>
+    <VersionPrefix>12.58.0-aot.1</VersionPrefix>
     <StainlessMainProject>true</StainlessMainProject>
-    <Description>The official .NET library for the Anthropic API.</Description>
+    <Description>Unofficial Native AOT-enabled fork of the Anthropic .NET SDK. Not affiliated with or endorsed by Anthropic.</Description>
     <OutputType>Library</OutputType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>logo.png</PackageIcon>

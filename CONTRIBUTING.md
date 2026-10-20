@@ -39,3 +39,7 @@ $ ./scripts/lint
 ```sh
 $ ./scripts/test
 ```
+
+## Publishing
+
+See [docs/PUBLISHING.md](./docs/PUBLISHING.md).

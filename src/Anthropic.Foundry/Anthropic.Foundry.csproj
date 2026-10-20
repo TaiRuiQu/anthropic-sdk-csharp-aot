@@ -2,7 +2,9 @@
   <PropertyGroup>
     <RootNamespace>Anthropic.Foundry</RootNamespace>
     <AssemblyName>Anthropic.Foundry</AssemblyName>
-    <PackageId>Anthropic.Foundry</PackageId>
+    <PackageId>TairuiQu.Anthropic.Foundry</PackageId>
+    <VersionPrefix>0.8.0-aot.1</VersionPrefix>
+    <Description>Unofficial Native AOT-enabled fork of the Anthropic Foundry client. Not affiliated with or endorsed by Anthropic.</Description>
     <PackageIcon>logo.png</PackageIcon>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>

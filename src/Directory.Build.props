@@ -1,13 +1,13 @@
 <Project>
   <Import Project="Versions.props" />
   <PropertyGroup>
-    <Authors>Anthropic</Authors>
-    <Company>Anthropic</Company>
-    <PackageTags>sdk;api;http;library</PackageTags>
+    <Authors>TairuiQu</Authors>
+    <Company>TairuiQu</Company>
+    <PackageTags>anthropic;claude;sdk;api;http;library;native-aot;aot</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>Copyright 2026 Anthropic</Copyright>
-    <PackageProjectUrl>https://docs.anthropic.com/claude/reference/</PackageProjectUrl>
-    <RepositoryUrl>https://www.github.com/anthropics/anthropic-sdk-csharp</RepositoryUrl>
+    <Copyright>Copyright 2023 Anthropic, PBC; fork modifications Copyright 2026 TairuiQu</Copyright>
+    <PackageProjectUrl>https://github.com/TairuiQu/anthropic-sdk-csharp-aot</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/TairuiQu/anthropic-sdk-csharp-aot</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 
     <!-- Strong naming -->
@@ -23,6 +23,7 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>embedded</DebugType>
 
     <!-- netstandard2.0 has no Native AOT support, so an AOT build targets .NET 10 only. -->

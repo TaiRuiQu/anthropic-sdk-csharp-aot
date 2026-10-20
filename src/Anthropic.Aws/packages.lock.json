@@ -169,7 +169,7 @@
           "System.Threading.Tasks.Extensions": "4.6.3"
         }
       },
-      "anthropic": {
+      "TairuiQu.Anthropic.Aot": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Extensions.AI.Abstractions": "[10.5.1, )",
@@ -223,7 +223,7 @@
         "resolved": "10.5.1",
         "contentHash": "nB0l3IlsVbNeUxsE7nZNb9GY8rP1OSeqpj0pseORPejt474HNKEauTWTLdSJPkSvPlRMxowZNMo6nyp7APAiSg=="
       },
-      "anthropic": {
+      "TairuiQu.Anthropic.Aot": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Extensions.AI.Abstractions": "[10.5.1, )"
@@ -299,7 +299,7 @@
           "System.Text.Encodings.Web": "10.0.6"
         }
       },
-      "anthropic": {
+      "TairuiQu.Anthropic.Aot": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Extensions.AI.Abstractions": "[10.5.1, )",
@@ -377,7 +377,7 @@
           "System.Text.Encodings.Web": "10.0.6"
         }
       },
-      "anthropic": {
+      "TairuiQu.Anthropic.Aot": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Extensions.AI.Abstractions": "[10.5.1, )",

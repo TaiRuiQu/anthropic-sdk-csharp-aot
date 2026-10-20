@@ -1,6 +1,16 @@
-# workflow for re-running publishing to NuGet in case it fails for some reason
-# you can run this workflow by navigating to https://www.github.com/anthropics/anthropic-sdk-csharp/actions/workflows/publish-nuget.yml
+# Publishes the fork's packages to nuget.org with GitHub OIDC Trusted Publishing.
+#
+# Prerequisites:
+#   - nuget.org -> Trusted Publishing -> add a policy for:
+#       Repository Owner: TairuiQu
+#       Repository:       anthropic-sdk-csharp-aot
+#       Workflow File:    publish-nuget.yml
+#       Environment:      (leave empty; this workflow does not use a GitHub environment)
+#
+# The workflow is manual on purpose: bump the versions in the .csproj files first, then run it
+# from the Actions tab.
 name: Publish to NuGet
+
 on:
   workflow_dispatch:
 
@@ -8,7 +18,9 @@ jobs:
   publish:
     name: publish
     runs-on: ubuntu-latest
-    environment: production-release
+    permissions:
+      contents: read
+      id-token: write # Required to request the GitHub OIDC token.
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -16,18 +28,53 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Build and pack
-        run: dotnet pack
-          --configuration Release
-          --output "${{github.workspace}}/artifacts/packages"
+        run: |
+          projects=(
+            src/Anthropic/Anthropic.csproj
+            src/Anthropic.Bedrock/Anthropic.Bedrock.csproj
+            src/Anthropic.Vertex/Anthropic.Vertex.csproj
+            src/Anthropic.Aws/Anthropic.Aws.csproj
+            src/Anthropic.Foundry/Anthropic.Foundry.csproj
+            src/Anthropic.GoogleCloud/Anthropic.GoogleCloud.csproj
+            src/Anthropic.Mcp/Anthropic.Mcp.csproj
+          )
 
-      - name: Publish package to nuget.org
-        run: dotnet nuget push
-          $(find ${{ github.workspace }}/artifacts/packages/*.nupkg ! -name "*.symbols.nupkg")
-          --source https://api.nuget.org/v3/index.json
-          --api-key $NUGET_API_KEY
-          --skip-duplicate
+          for project in "${projects[@]}"; do
+            dotnet pack "$project" \
+              --configuration Release \
+              --output "${{github.workspace}}/artifacts/packages"
+          done
+
+      # Exchanges the GitHub OIDC token for a short-lived nuget.org API key that is valid for one
+      # hour. `user` is the nuget.org profile name, not the GitHub login or email address; override
+      # it with a repository variable named NUGET_USER when the profile name differs.
+      - name: NuGet login (OIDC -> temporary API key)
+        id: login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ vars.NUGET_USER || 'TairuiQu' }}
+
+      - name: Publish packages and symbols to nuget.org
+        run: |
+          shopt -s nullglob
+          packages=(
+            artifacts/packages/*.nupkg
+            artifacts/packages/*.snupkg
+          )
+          if [ ${#packages[@]} -eq 0 ]; then
+            echo "No packages were produced."
+            exit 1
+          fi
+
+          for package in "${packages[@]}"; do
+            echo "Pushing $package"
+            dotnet nuget push "$package" \
+              --source https://api.nuget.org/v3/index.json \
+              --api-key "$NUGET_API_KEY" \
+              --skip-duplicate
+          done
         env:
-          NUGET_API_KEY: ${{ secrets.ANTHROPIC_NUGET_API_KEY || secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}

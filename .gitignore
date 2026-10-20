@@ -6,3 +6,6 @@ obj/
 
 # do not edit! excludes generated files used internally
 .artifacts/
+
+# Local package output from `dotnet pack -o artifacts/packages`
+artifacts/

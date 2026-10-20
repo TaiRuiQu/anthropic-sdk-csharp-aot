@@ -607,7 +607,7 @@
           "xunit.v3.runner.common": "[3.2.1]"
         }
       },
-      "anthropic": {
+      "TairuiQu.Anthropic.Aot": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Extensions.AI.Abstractions": "[10.5.1, )",
@@ -618,64 +618,64 @@
           "System.Threading.Tasks.Extensions": "[4.6.3, )"
         }
       },
-      "anthropic.aws": {
+      "TairuiQu.Anthropic.Aws": {
         "type": "Project",
         "dependencies": {
           "AWSSDK.Core": "[4.0.3.3, )",
           "AWSSDK.SSO": "[4.0.2.5, )",
           "AWSSDK.SSOOIDC": "[4.0.3.6, )",
-          "Anthropic": "[12.58.0, )",
           "Microsoft.Bcl.Memory": "[10.0.4, )",
           "System.Collections.Immutable": "[8.0.0, )",
-          "System.Threading.Tasks.Extensions": "[4.6.3, )"
+          "System.Threading.Tasks.Extensions": "[4.6.3, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.bedrock": {
+      "TairuiQu.Anthropic.Bedrock": {
         "type": "Project",
         "dependencies": {
           "AWSSDK.Core": "[4.0.3.3, )",
           "AWSSDK.SSO": "[4.0.2.5, )",
           "AWSSDK.SSOOIDC": "[4.0.3.6, )",
-          "Anthropic": "[12.58.0, )",
           "Microsoft.Bcl.Memory": "[10.0.4, )",
           "System.Collections.Immutable": "[8.0.0, )",
-          "System.Threading.Tasks.Extensions": "[4.6.3, )"
+          "System.Threading.Tasks.Extensions": "[4.6.3, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.foundry": {
+      "TairuiQu.Anthropic.Foundry": {
         "type": "Project",
         "dependencies": {
-          "Anthropic": "[12.58.0, )",
           "Azure.Identity": "[1.17.0, )",
           "System.Collections.Immutable": "[8.0.0, )",
-          "System.Threading.Tasks.Extensions": "[4.6.3, )"
+          "System.Threading.Tasks.Extensions": "[4.6.3, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.googlecloud": {
+      "TairuiQu.Anthropic.GoogleCloud": {
         "type": "Project",
         "dependencies": {
-          "Anthropic": "[12.58.0, )",
           "Google.Apis.Oauth2.v2": "[1.68.0.1869, )",
           "System.Collections.Immutable": "[8.0.0, )",
-          "System.Threading.Tasks.Extensions": "[4.6.3, )"
+          "System.Threading.Tasks.Extensions": "[4.6.3, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.mcp": {
+      "TairuiQu.Anthropic.Mcp": {
         "type": "Project",
         "dependencies": {
-          "Anthropic": "[12.58.0, )",
           "ModelContextProtocol.Core": "[1.2.0, )",
           "System.Memory": "[4.6.3, )",
-          "System.Threading.Tasks.Extensions": "[4.6.3, )"
+          "System.Threading.Tasks.Extensions": "[4.6.3, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.vertex": {
+      "TairuiQu.Anthropic.Vertex": {
         "type": "Project",
         "dependencies": {
-          "Anthropic": "[12.58.0, )",
           "Google.Apis.Oauth2.v2": "[1.68.0.1869, )",
           "System.Collections.Immutable": "[8.0.0, )",
-          "System.Threading.Tasks.Extensions": "[4.6.3, )"
+          "System.Threading.Tasks.Extensions": "[4.6.3, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       }
     },
@@ -1104,58 +1104,58 @@
           "xunit.v3.runner.common": "[3.2.1]"
         }
       },
-      "anthropic": {
+      "TairuiQu.Anthropic.Aot": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Extensions.AI.Abstractions": "[10.5.1, )"
         }
       },
-      "anthropic.aws": {
+      "TairuiQu.Anthropic.Aws": {
         "type": "Project",
         "dependencies": {
           "AWSSDK.Core": "[4.0.3.3, )",
           "AWSSDK.SSO": "[4.0.2.5, )",
           "AWSSDK.SSOOIDC": "[4.0.3.6, )",
-          "Anthropic": "[12.58.0, )",
-          "Microsoft.Bcl.Memory": "[10.0.4, )"
+          "Microsoft.Bcl.Memory": "[10.0.4, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.bedrock": {
+      "TairuiQu.Anthropic.Bedrock": {
         "type": "Project",
         "dependencies": {
           "AWSSDK.Core": "[4.0.3.3, )",
           "AWSSDK.SSO": "[4.0.2.5, )",
           "AWSSDK.SSOOIDC": "[4.0.3.6, )",
-          "Anthropic": "[12.58.0, )",
-          "Microsoft.Bcl.Memory": "[10.0.4, )"
+          "Microsoft.Bcl.Memory": "[10.0.4, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.foundry": {
+      "TairuiQu.Anthropic.Foundry": {
         "type": "Project",
         "dependencies": {
-          "Anthropic": "[12.58.0, )",
-          "Azure.Identity": "[1.17.0, )"
+          "Azure.Identity": "[1.17.0, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.googlecloud": {
+      "TairuiQu.Anthropic.GoogleCloud": {
         "type": "Project",
         "dependencies": {
-          "Anthropic": "[12.58.0, )",
-          "Google.Apis.Oauth2.v2": "[1.68.0.1869, )"
+          "Google.Apis.Oauth2.v2": "[1.68.0.1869, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.mcp": {
+      "TairuiQu.Anthropic.Mcp": {
         "type": "Project",
         "dependencies": {
-          "Anthropic": "[12.58.0, )",
-          "ModelContextProtocol.Core": "[1.2.0, )"
+          "ModelContextProtocol.Core": "[1.2.0, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.vertex": {
+      "TairuiQu.Anthropic.Vertex": {
         "type": "Project",
         "dependencies": {
-          "Anthropic": "[12.58.0, )",
-          "Google.Apis.Oauth2.v2": "[1.68.0.1869, )"
+          "Google.Apis.Oauth2.v2": "[1.68.0.1869, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       }
     },
@@ -1617,7 +1617,7 @@
           "xunit.v3.runner.common": "[3.2.1]"
         }
       },
-      "anthropic": {
+      "TairuiQu.Anthropic.Aot": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Extensions.AI.Abstractions": "[10.5.1, )",
@@ -1625,52 +1625,52 @@
           "System.Text.Json": "[10.0.6, )"
         }
       },
-      "anthropic.aws": {
+      "TairuiQu.Anthropic.Aws": {
         "type": "Project",
         "dependencies": {
           "AWSSDK.Core": "[4.0.3.3, )",
           "AWSSDK.SSO": "[4.0.2.5, )",
           "AWSSDK.SSOOIDC": "[4.0.3.6, )",
-          "Anthropic": "[12.58.0, )",
-          "Microsoft.Bcl.Memory": "[10.0.4, )"
+          "Microsoft.Bcl.Memory": "[10.0.4, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.bedrock": {
+      "TairuiQu.Anthropic.Bedrock": {
         "type": "Project",
         "dependencies": {
           "AWSSDK.Core": "[4.0.3.3, )",
           "AWSSDK.SSO": "[4.0.2.5, )",
           "AWSSDK.SSOOIDC": "[4.0.3.6, )",
-          "Anthropic": "[12.58.0, )",
-          "Microsoft.Bcl.Memory": "[10.0.4, )"
+          "Microsoft.Bcl.Memory": "[10.0.4, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.foundry": {
+      "TairuiQu.Anthropic.Foundry": {
         "type": "Project",
         "dependencies": {
-          "Anthropic": "[12.58.0, )",
-          "Azure.Identity": "[1.17.0, )"
+          "Azure.Identity": "[1.17.0, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.googlecloud": {
+      "TairuiQu.Anthropic.GoogleCloud": {
         "type": "Project",
         "dependencies": {
-          "Anthropic": "[12.58.0, )",
-          "Google.Apis.Oauth2.v2": "[1.68.0.1869, )"
+          "Google.Apis.Oauth2.v2": "[1.68.0.1869, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.mcp": {
+      "TairuiQu.Anthropic.Mcp": {
         "type": "Project",
         "dependencies": {
-          "Anthropic": "[12.58.0, )",
-          "ModelContextProtocol.Core": "[1.2.0, )"
+          "ModelContextProtocol.Core": "[1.2.0, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       },
-      "anthropic.vertex": {
+      "TairuiQu.Anthropic.Vertex": {
         "type": "Project",
         "dependencies": {
-          "Anthropic": "[12.58.0, )",
-          "Google.Apis.Oauth2.v2": "[1.68.0.1869, )"
+          "Google.Apis.Oauth2.v2": "[1.68.0.1869, )",
+          "TairuiQu.Anthropic.Aot": "[12.58.0-aot.1, )"
         }
       }
     },

@@ -4,8 +4,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <PackageId>Anthropic.GoogleCloud</PackageId>
-    <Description>The official .NET library for Claude Platform on Google Cloud.</Description>
+    <PackageId>TairuiQu.Anthropic.GoogleCloud</PackageId>
+    <VersionPrefix>0.2.0-aot.1</VersionPrefix>
+    <Description>Unofficial Native AOT-enabled fork of the Anthropic Google Cloud client. Not affiliated with or endorsed by Anthropic.</Description>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
   </PropertyGroup>
 

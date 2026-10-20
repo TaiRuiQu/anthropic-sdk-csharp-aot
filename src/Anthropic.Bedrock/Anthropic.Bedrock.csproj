@@ -8,7 +8,9 @@
     <LangVersion>13.0</LangVersion>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
     
-    <PackageId>Anthropic.Bedrock</PackageId>
+    <PackageId>TairuiQu.Anthropic.Bedrock</PackageId>
+    <VersionPrefix>0.14.0-aot.1</VersionPrefix>
+    <Description>Unofficial Native AOT-enabled fork of the Anthropic Bedrock client. Not affiliated with or endorsed by Anthropic.</Description>
   </PropertyGroup>
 
   <ItemGroup>

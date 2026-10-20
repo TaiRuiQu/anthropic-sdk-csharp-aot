@@ -1,9 +1,9 @@
-# Claude SDK for C#
+# Claude SDK for C# (Native AOT fork)
 
-[![NuGet Version](https://img.shields.io/nuget/v/Anthropic.svg)](https://www.nuget.org/packages/Anthropic)
+[![NuGet Version](https://img.shields.io/nuget/vpre/TairuiQu.Anthropic.Aot.svg)](https://www.nuget.org/packages/TairuiQu.Anthropic.Aot)
 
 > [!IMPORTANT]
-> As of version 10+, the `Anthropic` package is now the official Claude SDK for C#. Package versions 3.X and below were previously used for the tryAGI community-built SDK, which has moved to [`tryAGI.Anthropic`](https://www.nuget.org/packages/tryagi.Anthropic/). If you need to continue using the former client in your project, update your package reference to `tryAGI.Anthropic`.
+> This is an **unofficial fork** of the official [Anthropic C# SDK](https://github.com/anthropics/anthropic-sdk-csharp), with .NET 10 and Native AOT support added. It is not affiliated with or endorsed by Anthropic. The official package is [`Anthropic`](https://www.nuget.org/packages/Anthropic); use this fork only if you need its Native AOT support.
 
 The Claude SDK for C# provides access to the [Claude API](https://docs.anthropic.com/en/api/) from C# applications.
 
@@ -14,8 +14,11 @@ Full documentation is available at **[platform.claude.com/docs/en/api/sdks/cshar
 ## Installation
 
 ```bash
-dotnet add package Anthropic
+dotnet add package TairuiQu.Anthropic.Aot --prerelease
 ```
+
+The cloud platform clients are published under matching IDs, for example
+`TairuiQu.Anthropic.Bedrock` and `TairuiQu.Anthropic.Vertex`.
 
 ## Getting started
 
