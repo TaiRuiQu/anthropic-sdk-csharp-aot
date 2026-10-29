@@ -359,6 +359,8 @@ AddListApiEnum("Anthropic.Models.Organization.Workspaces.AllowedInferenceGeo");
 AddDictionary("Anthropic.Models.Beta.Messages.BetaMcpToolConfig");
 AddDictionary("Anthropic.Models.Beta.UserProfiles.BetaUserProfileTrustGrant");
 AddDictionary("System.String");
+AddDictionary("Anthropic.Models.UserProfiles.UserProfileCyberTier");
+AddDictionary("Anthropic.Models.UserProfiles.UserProfileEfsFeature");
 
 AddList("Anthropic.Models.Beta.Messages.BetaTextBlockParam");
 AddList("Anthropic.Models.Messages.TextBlockParam");
@@ -404,6 +406,7 @@ Add(typeof(Guid));
 
 // Collection shapes used by the raw-JSON dictionary accessors and credential requests.
 Add(typeof(JsonElement));
+Add(typeof(JsonElement[]));
 Add(typeof(JsonObject));
 Add(typeof(JsonArray));
 Add(typeof(JsonValue));

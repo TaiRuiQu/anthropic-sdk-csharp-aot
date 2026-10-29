@@ -50,10 +50,12 @@ internal static class JsonSerializer
     {
         return new JsonSerializerOptions
         {
-            TypeInfoResolver = JsonTypeInfoResolver.Combine(
-                AnthropicJsonSerializerContext.Default,
-                new DefaultJsonTypeInfoResolver()
-            ),
+            TypeInfoResolver = System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault
+                ? JsonTypeInfoResolver.Combine(
+                    AnthropicJsonSerializerContext.Default,
+                    new DefaultJsonTypeInfoResolver()
+                )
+                : AnthropicJsonSerializerContext.Default,
         };
     }
 
