@@ -242,6 +242,17 @@ static class FallbackTestSupport
     public static JsonNode Block(BetaContentBlockParam block) =>
         JsonSerializer.SerializeToNode(block, ModelBase.SerializerOptions)!;
 
+    /// <summary>A POST of the given body with the qualifiers of the SDK's beta services.</summary>
+    public static HttpRequestMessage BetaRequest(string path, string body)
+    {
+        HttpRequestMessage request = new(HttpMethod.Post, "https://api.example.com" + path)
+        {
+            Content = new StringContent(body, Encoding.UTF8, "application/json"),
+        };
+        Qualifiers.Attach(request, new Dictionary<string, string>() { ["beta"] = "true" });
+        return request;
+    }
+
     /// <summary>The API's error body for the given status.</summary>
     public static string ErrorBody(int status)
     {
@@ -269,7 +280,8 @@ static class FallbackTestSupport
 
     /// <summary>
     /// Captures everything the action writes to <see cref="Console.Error"/>. Tests using this
-    /// must share the "console stderr" xunit collection so they don't race on the global writer.
+    /// must share the "console stderr" xunit collection, or be in one that disables
+    /// parallelization, so they don't race on the global writer.
     /// </summary>
     public static async Task<string> CaptureStderr(Func<Task> action)
     {

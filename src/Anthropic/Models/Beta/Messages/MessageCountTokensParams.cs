@@ -82,8 +82,7 @@ public record class MessageCountTokensParams : ParamsBase
     /// <para>See [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).</para>
     ///
     /// <para>Note that if you want to include a [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-    /// you can use the top-level `system` parameter — there is no `"system"` role
-    /// for input messages in the Messages API.</para>
+    /// you can use the top-level `system` parameter.</para>
     ///
     /// <para>There is a limit of 100,000 messages in a single request.</para>
     /// </summary>
@@ -434,7 +433,7 @@ public record class MessageCountTokensParams : ParamsBase
 
     /// <summary>
     /// The user profile ID to attribute this request to. Use when acting on behalf
-    /// of a party other than your organization. Requires the `user-profiles` beta header.
+    /// of a party other than your organization.
     /// </summary>
     public string? UserProfileID
     {
@@ -562,12 +561,11 @@ public record class MessageCountTokensParams : ParamsBase
 
     public override System::Uri Url(ClientOptions options)
     {
-        var queryString = this.QueryString(options);
         return new System::UriBuilder(
             options.BaseUrl.ToString().TrimEnd('/') + "/v1/messages/count_tokens"
         )
         {
-            Query = string.IsNullOrEmpty(queryString) ? "beta=true" : ("beta=true&" + queryString),
+            Query = this.QueryString(options),
         }.Uri;
     }
 

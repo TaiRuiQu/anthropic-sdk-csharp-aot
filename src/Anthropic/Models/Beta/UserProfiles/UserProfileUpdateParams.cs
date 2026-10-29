@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -9,7 +10,6 @@ using System.Text.Json.Serialization;
 using Anthropic.Core;
 using Anthropic.Exceptions;
 using Anthropic.Services.Beta;
-using System = System;
 
 namespace Anthropic.Models.Beta.UserProfiles;
 
@@ -47,8 +47,8 @@ public record class UserProfileUpdateParams : ParamsBase
 
     /// <summary>
     /// If present, replaces the stored external_id. Omit to leave unchanged. Maximum
-    /// 255 characters. Accepted under the `user-profiles-2026-03-24` and `user-profiles-2026-08-18`
-    /// beta headers; under `user-profiles-2026-09-04` send `external_user_details.reference_id` instead.
+    /// 255 characters. Legacy field, accepted only under the `user-profiles-2026-03-24`
+    /// and `user-profiles-2026-08-18` beta headers; without one of them, send `external_user_details.reference_id`.
     /// </summary>
     public string? ExternalID
     {
@@ -63,8 +63,8 @@ public record class UserProfileUpdateParams : ParamsBase
     /// <summary>
     /// Details about the entity this profile represents, as the platform states them.
     /// Each field sent replaces the stored value; omit a field to leave it unchanged.
-    /// Once set, a value cannot be cleared and `null` is rejected. Accepted under
-    /// the `user-profiles-2026-09-04` beta header only.
+    /// Once set, a value cannot be cleared and `null` is rejected. Not accepted under
+    /// the legacy `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers.
     /// </summary>
     public BetaUserProfileExternalUserDetailsParams? ExternalUserDetails
     {
@@ -90,16 +90,16 @@ public record class UserProfileUpdateParams : ParamsBase
     /// <summary>
     /// If present, replaces the stored account creation time. Omit to leave unchanged;
     /// once set, the value cannot be cleared and `null` is rejected. Must be a complete
-    /// RFC 3339 timestamp no more than 1 minute in the future. Accepted under the
-    /// `user-profiles-2026-08-18` beta header; under `user-profiles-2026-09-04`
-    /// send `external_user_details.onboarded_at` instead.
+    /// RFC 3339 timestamp no more than 1 minute in the future. Legacy field, accepted
+    /// only under the `user-profiles-2026-08-18` beta header; without a legacy header,
+    /// send `external_user_details.onboarded_at`.
     /// </summary>
-    public System::DateTimeOffset? ExternalUserOnboardedAt
+    public DateTimeOffset? ExternalUserOnboardedAt
     {
         get
         {
             this._rawBodyData.Freeze();
-            return this._rawBodyData.GetNullableStruct<System::DateTimeOffset>(
+            return this._rawBodyData.GetNullableStruct<DateTimeOffset>(
                 "external_user_onboarded_at"
             );
         }
@@ -157,8 +157,7 @@ public record class UserProfileUpdateParams : ParamsBase
     }
 
     /// <summary>
-    /// This endpoint is in beta: requests must send `user-profiles-2026-03-24`, `user-profiles-2026-08-18`,
-    /// or `user-profiles-2026-09-04` in this header.
+    /// Optional header to specify the beta version(s) you want to use.
     /// </summary>
     public IReadOnlyList<ApiEnum<string, AnthropicBeta>>? Betas
     {
@@ -297,10 +296,9 @@ public record class UserProfileUpdateParams : ParamsBase
             && this._rawBodyData.Equals(other._rawBodyData);
     }
 
-    public override System::Uri Url(ClientOptions options)
+    public override Uri Url(ClientOptions options)
     {
-        var queryString = this.QueryString(options);
-        return new System::UriBuilder(
+        return new UriBuilder(
             options.BaseUrl.ToString().TrimEnd('/')
                 + string.Format(
                     "/v1/user_profiles/{0}",
@@ -308,7 +306,7 @@ public record class UserProfileUpdateParams : ParamsBase
                 )
         )
         {
-            Query = string.IsNullOrEmpty(queryString) ? "beta=true" : ("beta=true&" + queryString),
+            Query = this.QueryString(options),
         }.Uri;
     }
 
@@ -362,7 +360,7 @@ sealed class UserProfileUpdateParamsAccessTypeConverter
 {
     public override UserProfileUpdateParamsAccessType Read(
         ref Utf8JsonReader reader,
-        System::Type typeToConvert,
+        Type typeToConvert,
         JsonSerializerOptions options
     )
     {

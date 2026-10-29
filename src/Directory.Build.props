@@ -4,7 +4,7 @@
     <Authors>TairuiQu</Authors>
     <Company>TairuiQu</Company>
     <PackageTags>anthropic;claude;sdk;api;http;library;native-aot;aot</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <Copyright>Copyright 2023 Anthropic, PBC; fork modifications Copyright 2026 TairuiQu</Copyright>
     <PackageProjectUrl>https://github.com/TairuiQu/anthropic-sdk-csharp-aot</PackageProjectUrl>
     <RepositoryUrl>https://github.com/TairuiQu/anthropic-sdk-csharp-aot</RepositoryUrl>

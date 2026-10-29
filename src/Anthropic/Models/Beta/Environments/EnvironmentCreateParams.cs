@@ -242,10 +242,9 @@ public record class EnvironmentCreateParams : ParamsBase
 
     public override System::Uri Url(ClientOptions options)
     {
-        var queryString = this.QueryString(options);
         return new System::UriBuilder(options.BaseUrl.ToString().TrimEnd('/') + "/v1/environments")
         {
-            Query = string.IsNullOrEmpty(queryString) ? "beta=true" : ("beta=true&" + queryString),
+            Query = this.QueryString(options),
         }.Uri;
     }
 
@@ -297,15 +296,18 @@ public record class Config : ModelBase
         }
     }
 
-    public JsonElement Type
+    public ApiEnum<string, ConfigType> Type
     {
         get
         {
             return this.Value switch
             {
-                BetaCloudConfigParams x => x.Type,
-                BetaSelfHostedConfigParams x => x.Type,
-                _ => WrappedJsonSerializer.GetNotNullStructProperty<JsonElement>(this.Json, "type"),
+                BetaCloudConfigParams _ => ConfigType.Cloud,
+                BetaSelfHostedConfigParams _ => ConfigType.SelfHosted,
+                _ => WrappedJsonSerializer.GetNotNullClassProperty<ApiEnum<string, ConfigType>>(
+                    this.Json,
+                    "type"
+                ),
             };
         }
     }
@@ -569,6 +571,50 @@ sealed class ConfigConverter : JsonConverter<Config?>
     public override void Write(Utf8JsonWriter writer, Config? value, JsonSerializerOptions options)
     {
         JsonSerializer.Serialize(writer, value?.Json, options);
+    }
+}
+
+[JsonConverter(typeof(ConfigTypeConverter))]
+public enum ConfigType
+{
+    Cloud,
+    SelfHosted,
+}
+
+sealed class ConfigTypeConverter : JsonConverter<ConfigType>
+{
+    public override ConfigType Read(
+        ref Utf8JsonReader reader,
+        System::Type typeToConvert,
+        JsonSerializerOptions options
+    )
+    {
+        return JsonSerializer.Deserialize<string>(ref reader, options) switch
+        {
+            "cloud" => ConfigType.Cloud,
+            "self_hosted" => ConfigType.SelfHosted,
+            _ => (ConfigType)(-1),
+        };
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        ConfigType value,
+        JsonSerializerOptions options
+    )
+    {
+        JsonSerializer.Serialize(
+            writer,
+            value switch
+            {
+                ConfigType.Cloud => "cloud",
+                ConfigType.SelfHosted => "self_hosted",
+                _ => throw new AnthropicInvalidDataException(
+                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
+                ),
+            },
+            options
+        );
     }
 }
 

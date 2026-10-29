@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -5,7 +6,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Anthropic.Core;
 using Anthropic.Exceptions;
-using System = System;
 
 namespace Anthropic.Models.Beta.MemoryStores;
 
@@ -20,9 +20,8 @@ namespace Anthropic.Models.Beta.MemoryStores;
 public sealed record class BetaManagedAgentsMemoryStore : JsonModel
 {
     /// <summary>
-    /// Unique identifier for the memory store (a `memstore_...` tagged ID). Use this
-    /// when attaching the store to a session, or in the `{memory_store_id}` path
-    /// parameter of subsequent calls.
+    /// The unique ID of the memory store (`memstore_...`). Use it to attach the store
+    /// to a session.
     /// </summary>
     public required string ID
     {
@@ -35,37 +34,43 @@ public sealed record class BetaManagedAgentsMemoryStore : JsonModel
     }
 
     /// <summary>
-    /// Timestamp when the store was archived, or `null` if active. Set once and never
-    /// cleared; archiving is one-way. Archived stores are read-only and cannot be
-    /// attached to new sessions.
+    /// When the memory store was archived, in RFC 3339, or `null` if it hasn't been.
+    ///
+    /// <para>Archiving can't be undone. An archived store can't be attached to new
+    /// sessions. You can't create or update its memories or update the store. You
+    /// can still read and delete its memories, redact their versions, and delete
+    /// the store.</para>
+    ///
+    /// <para>See the [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#archive-a-store)
+    /// to learn more about archiving.</para>
     /// </summary>
-    public required System::DateTimeOffset? ArchivedAt
+    public required DateTimeOffset? ArchivedAt
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNullableStruct<System::DateTimeOffset>("archived_at");
+            return this._rawData.GetNullableStruct<DateTimeOffset>("archived_at");
         }
         init { this._rawData.Set("archived_at", value); }
     }
 
     /// <summary>
-    /// Timestamp when the store was created.
+    /// When the memory store was created, in RFC 3339.
     /// </summary>
-    public required System::DateTimeOffset CreatedAt
+    public required DateTimeOffset CreatedAt
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullStruct<System::DateTimeOffset>("created_at");
+            return this._rawData.GetNotNullStruct<DateTimeOffset>("created_at");
         }
         init { this._rawData.Set("created_at", value); }
     }
 
     /// <summary>
-    /// Free-text description of what the store contains, up to 1024 characters. Included
-    /// in the agent's system prompt when the store is attached, so word it to be
-    /// useful to the agent. Empty string when unset.
+    /// Free-text description of what the store contains, up to 1,024 characters.
+    /// Included in the agent's system prompt when the store is attached, so word
+    /// it to be useful to the agent. Empty string when unset.
     /// </summary>
     public required string Description
     {
@@ -78,9 +83,10 @@ public sealed record class BetaManagedAgentsMemoryStore : JsonModel
     }
 
     /// <summary>
-    /// Arbitrary key-value tags for your own bookkeeping (such as the end user a
-    /// store belongs to). Up to 16 pairs; keys 1–64 characters; values up to 512
-    /// characters. Returned on retrieve/list but not filterable.
+    /// Key-value pairs for your own use, such as the end user that the store belongs to.
+    ///
+    /// <para>A store has at most 16 pairs. Keys are 1 to 64 characters long and values
+    /// at most 512 characters. You can't filter lists by metadata.</para>
     /// </summary>
     public required IReadOnlyDictionary<string, string> Metadata
     {
@@ -112,28 +118,28 @@ public sealed record class BetaManagedAgentsMemoryStore : JsonModel
         init { this._rawData.Set("name", value); }
     }
 
-    public required ApiEnum<string, BetaManagedAgentsMemoryStoreType> Type
+    public JsonElement Type
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullClass<ApiEnum<string, BetaManagedAgentsMemoryStoreType>>(
-                "type"
-            );
+            return this._rawData.GetNotNullStruct<JsonElement>("type");
         }
         init { this._rawData.Set("type", value); }
     }
 
     /// <summary>
-    /// Timestamp when the store's `name`, `description`, or `metadata` was last
-    /// modified. Memory writes inside the store do not advance this.
+    /// When the memory store was last changed, in RFC 3339.
+    ///
+    /// <para>Changing its `name`, `description`, or `metadata` updates it. Archiving
+    /// the store does too. Changes to the store's memories don't.</para>
     /// </summary>
-    public required System::DateTimeOffset UpdatedAt
+    public required DateTimeOffset UpdatedAt
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullStruct<System::DateTimeOffset>("updated_at");
+            return this._rawData.GetNotNullStruct<DateTimeOffset>("updated_at");
         }
         init { this._rawData.Set("updated_at", value); }
     }
@@ -147,11 +153,17 @@ public sealed record class BetaManagedAgentsMemoryStore : JsonModel
         _ = this.Description;
         _ = this.Metadata;
         _ = this.Name;
-        this.Type.Validate();
+        if (!JsonElement.DeepEquals(this.Type, JsonSerializer.SerializeToElement("memory_store")))
+        {
+            throw new AnthropicInvalidDataException("Invalid value given for constant");
+        }
         _ = this.UpdatedAt;
     }
 
-    public BetaManagedAgentsMemoryStore() { }
+    public BetaManagedAgentsMemoryStore()
+    {
+        this.Type = JsonSerializer.SerializeToElement("memory_store");
+    }
 
 #pragma warning disable CS8618
     [SetsRequiredMembers]
@@ -162,6 +174,8 @@ public sealed record class BetaManagedAgentsMemoryStore : JsonModel
     public BetaManagedAgentsMemoryStore(IReadOnlyDictionary<string, JsonElement> rawData)
     {
         this._rawData = new(rawData);
+
+        this.Type = JsonSerializer.SerializeToElement("memory_store");
     }
 
 #pragma warning disable CS8618
@@ -187,46 +201,4 @@ class BetaManagedAgentsMemoryStoreFromRaw : IFromRawJson<BetaManagedAgentsMemory
     public BetaManagedAgentsMemoryStore FromRawUnchecked(
         IReadOnlyDictionary<string, JsonElement> rawData
     ) => BetaManagedAgentsMemoryStore.FromRawUnchecked(rawData);
-}
-
-[JsonConverter(typeof(BetaManagedAgentsMemoryStoreTypeConverter))]
-public enum BetaManagedAgentsMemoryStoreType
-{
-    MemoryStore,
-}
-
-sealed class BetaManagedAgentsMemoryStoreTypeConverter
-    : JsonConverter<BetaManagedAgentsMemoryStoreType>
-{
-    public override BetaManagedAgentsMemoryStoreType Read(
-        ref Utf8JsonReader reader,
-        System::Type typeToConvert,
-        JsonSerializerOptions options
-    )
-    {
-        return JsonSerializer.Deserialize<string>(ref reader, options) switch
-        {
-            "memory_store" => BetaManagedAgentsMemoryStoreType.MemoryStore,
-            _ => (BetaManagedAgentsMemoryStoreType)(-1),
-        };
-    }
-
-    public override void Write(
-        Utf8JsonWriter writer,
-        BetaManagedAgentsMemoryStoreType value,
-        JsonSerializerOptions options
-    )
-    {
-        JsonSerializer.Serialize(
-            writer,
-            value switch
-            {
-                BetaManagedAgentsMemoryStoreType.MemoryStore => "memory_store",
-                _ => throw new AnthropicInvalidDataException(
-                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
-                ),
-            },
-            options
-        );
-    }
 }

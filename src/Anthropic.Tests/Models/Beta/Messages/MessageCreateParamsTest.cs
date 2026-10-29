@@ -18,16 +18,7 @@ public class MessageCreateParamsTest : TestBase
         var parameters = new MessageCreateParams
         {
             MaxTokens = 1024,
-            Messages =
-            [
-                new()
-                {
-                    Content = "Hello, world",
-                    Role = Role.User,
-                    ClearAt = ClearAt.NextUserMessage,
-                    OutputConfig = new() { Effort = BetaSystemMessageOutputConfigEffort.Low },
-                },
-            ],
+            Messages = [new BetaUserMessageParam("Hello, world")],
             Model = Messages::Model.ClaudeOpus5_5,
             CacheControl = new() { Ttl = Ttl.Ttl5m },
             Compaction = new() { Instructions = "instructions" },
@@ -115,7 +106,6 @@ public class MessageCreateParamsTest : TestBase
                     },
                 ]
             ),
-            Temperature = 1,
             Thinking = new BetaThinkingConfigAdaptive()
             {
                 BlockBinding = new()
@@ -124,6 +114,7 @@ public class MessageCreateParamsTest : TestBase
                 },
                 Display = Display.Summarized,
             },
+            Thread = new BetaThreadCreateParams(),
             ToolChoice = new BetaToolChoiceAuto() { DisableParallelToolUse = true },
             Tools =
             [
@@ -155,24 +146,13 @@ public class MessageCreateParamsTest : TestBase
                     Type = BetaToolType.Custom,
                 },
             ],
-            TopK = 5,
-            TopP = 0.7,
             Betas = [AnthropicBeta.MessageBatches2024_09_24],
             UserProfileID = "anthropic-user-profile-id",
             WorkspaceID = "wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         };
 
         long expectedMaxTokens = 1024;
-        List<BetaMessageParam> expectedMessages =
-        [
-            new()
-            {
-                Content = "Hello, world",
-                Role = Role.User,
-                ClearAt = ClearAt.NextUserMessage,
-                OutputConfig = new() { Effort = BetaSystemMessageOutputConfigEffort.Low },
-            },
-        ];
+        List<BetaMessageParam> expectedMessages = [new BetaUserMessageParam("Hello, world")];
         ApiEnum<string, Messages::Model> expectedModel = Messages::Model.ClaudeOpus5_5;
         BetaCacheControlEphemeral expectedCacheControl = new() { Ttl = Ttl.Ttl5m };
         BetaCompactionConfig expectedCompaction = new() { Instructions = "instructions" };
@@ -263,7 +243,6 @@ public class MessageCreateParamsTest : TestBase
                 },
             ]
         );
-        double expectedTemperature = 1;
         BetaThinkingConfigParam expectedThinking = new BetaThinkingConfigAdaptive()
         {
             BlockBinding = new()
@@ -272,6 +251,7 @@ public class MessageCreateParamsTest : TestBase
             },
             Display = Display.Summarized,
         };
+        BetaMessageThreadParam expectedThread = new BetaThreadCreateParams();
         BetaToolChoice expectedToolChoice = new BetaToolChoiceAuto()
         {
             DisableParallelToolUse = true,
@@ -306,8 +286,6 @@ public class MessageCreateParamsTest : TestBase
                 Type = BetaToolType.Custom,
             },
         ];
-        long expectedTopK = 5;
-        double expectedTopP = 0.7;
         List<ApiEnum<string, AnthropicBeta>> expectedBetas =
         [
             AnthropicBeta.MessageBatches2024_09_24,
@@ -348,8 +326,8 @@ public class MessageCreateParamsTest : TestBase
             Assert.Equal(expectedStopSequences[i], parameters.StopSequences[i]);
         }
         Assert.Equal(expectedSystem, parameters.System);
-        Assert.Equal(expectedTemperature, parameters.Temperature);
         Assert.Equal(expectedThinking, parameters.Thinking);
+        Assert.Equal(expectedThread, parameters.Thread);
         Assert.Equal(expectedToolChoice, parameters.ToolChoice);
         Assert.NotNull(parameters.Tools);
         Assert.Equal(expectedTools.Count, parameters.Tools.Count);
@@ -357,8 +335,6 @@ public class MessageCreateParamsTest : TestBase
         {
             Assert.Equal(expectedTools[i], parameters.Tools[i]);
         }
-        Assert.Equal(expectedTopK, parameters.TopK);
-        Assert.Equal(expectedTopP, parameters.TopP);
         Assert.NotNull(parameters.Betas);
         Assert.Equal(expectedBetas.Count, parameters.Betas.Count);
         for (int i = 0; i < expectedBetas.Count; i++)
@@ -375,16 +351,7 @@ public class MessageCreateParamsTest : TestBase
         var parameters = new MessageCreateParams
         {
             MaxTokens = 1024,
-            Messages =
-            [
-                new()
-                {
-                    Content = "Hello, world",
-                    Role = Role.User,
-                    ClearAt = ClearAt.NextUserMessage,
-                    OutputConfig = new() { Effort = BetaSystemMessageOutputConfigEffort.Low },
-                },
-            ],
+            Messages = [new BetaUserMessageParam("Hello, world")],
             Model = Messages::Model.ClaudeOpus5_5,
             CacheControl = new() { Ttl = Ttl.Ttl5m },
             Compaction = new() { Instructions = "instructions" },
@@ -427,6 +394,7 @@ public class MessageCreateParamsTest : TestBase
                 },
             },
             Speed = Speed.Standard,
+            Thread = new BetaThreadCreateParams(),
         };
 
         Assert.Null(parameters.McpServers);
@@ -441,18 +409,12 @@ public class MessageCreateParamsTest : TestBase
         Assert.False(parameters.RawBodyData.ContainsKey("stop_sequences"));
         Assert.Null(parameters.System);
         Assert.False(parameters.RawBodyData.ContainsKey("system"));
-        Assert.Null(parameters.Temperature);
-        Assert.False(parameters.RawBodyData.ContainsKey("temperature"));
         Assert.Null(parameters.Thinking);
         Assert.False(parameters.RawBodyData.ContainsKey("thinking"));
         Assert.Null(parameters.ToolChoice);
         Assert.False(parameters.RawBodyData.ContainsKey("tool_choice"));
         Assert.Null(parameters.Tools);
         Assert.False(parameters.RawBodyData.ContainsKey("tools"));
-        Assert.Null(parameters.TopK);
-        Assert.False(parameters.RawBodyData.ContainsKey("top_k"));
-        Assert.Null(parameters.TopP);
-        Assert.False(parameters.RawBodyData.ContainsKey("top_p"));
         Assert.Null(parameters.Betas);
         Assert.False(parameters.RawHeaderData.ContainsKey("anthropic-beta"));
         Assert.Null(parameters.UserProfileID);
@@ -467,16 +429,7 @@ public class MessageCreateParamsTest : TestBase
         var parameters = new MessageCreateParams
         {
             MaxTokens = 1024,
-            Messages =
-            [
-                new()
-                {
-                    Content = "Hello, world",
-                    Role = Role.User,
-                    ClearAt = ClearAt.NextUserMessage,
-                    OutputConfig = new() { Effort = BetaSystemMessageOutputConfigEffort.Low },
-                },
-            ],
+            Messages = [new BetaUserMessageParam("Hello, world")],
             Model = Messages::Model.ClaudeOpus5_5,
             CacheControl = new() { Ttl = Ttl.Ttl5m },
             Compaction = new() { Instructions = "instructions" },
@@ -519,6 +472,7 @@ public class MessageCreateParamsTest : TestBase
                 },
             },
             Speed = Speed.Standard,
+            Thread = new BetaThreadCreateParams(),
 
             // Null should be interpreted as omitted for these properties
             McpServers = null,
@@ -527,12 +481,9 @@ public class MessageCreateParamsTest : TestBase
             ServiceTier = null,
             StopSequences = null,
             System = null,
-            Temperature = null,
             Thinking = null,
             ToolChoice = null,
             Tools = null,
-            TopK = null,
-            TopP = null,
             Betas = null,
             UserProfileID = null,
             WorkspaceID = null,
@@ -550,18 +501,12 @@ public class MessageCreateParamsTest : TestBase
         Assert.False(parameters.RawBodyData.ContainsKey("stop_sequences"));
         Assert.Null(parameters.System);
         Assert.False(parameters.RawBodyData.ContainsKey("system"));
-        Assert.Null(parameters.Temperature);
-        Assert.False(parameters.RawBodyData.ContainsKey("temperature"));
         Assert.Null(parameters.Thinking);
         Assert.False(parameters.RawBodyData.ContainsKey("thinking"));
         Assert.Null(parameters.ToolChoice);
         Assert.False(parameters.RawBodyData.ContainsKey("tool_choice"));
         Assert.Null(parameters.Tools);
         Assert.False(parameters.RawBodyData.ContainsKey("tools"));
-        Assert.Null(parameters.TopK);
-        Assert.False(parameters.RawBodyData.ContainsKey("top_k"));
-        Assert.Null(parameters.TopP);
-        Assert.False(parameters.RawBodyData.ContainsKey("top_p"));
         Assert.Null(parameters.Betas);
         Assert.False(parameters.RawHeaderData.ContainsKey("anthropic-beta"));
         Assert.Null(parameters.UserProfileID);
@@ -576,16 +521,7 @@ public class MessageCreateParamsTest : TestBase
         var parameters = new MessageCreateParams
         {
             MaxTokens = 1024,
-            Messages =
-            [
-                new()
-                {
-                    Content = "Hello, world",
-                    Role = Role.User,
-                    ClearAt = ClearAt.NextUserMessage,
-                    OutputConfig = new() { Effort = BetaSystemMessageOutputConfigEffort.Low },
-                },
-            ],
+            Messages = [new BetaUserMessageParam("Hello, world")],
             Model = Messages::Model.ClaudeOpus5_5,
             CacheControl = new() { Ttl = Ttl.Ttl5m },
             Compaction = new() { Instructions = "instructions" },
@@ -673,7 +609,6 @@ public class MessageCreateParamsTest : TestBase
                     },
                 ]
             ),
-            Temperature = 1,
             Thinking = new BetaThinkingConfigAdaptive()
             {
                 BlockBinding = new()
@@ -682,6 +617,7 @@ public class MessageCreateParamsTest : TestBase
                 },
                 Display = Display.Summarized,
             },
+            Thread = new BetaThreadCreateParams(),
             ToolChoice = new BetaToolChoiceAuto() { DisableParallelToolUse = true },
             Tools =
             [
@@ -713,8 +649,6 @@ public class MessageCreateParamsTest : TestBase
                     Type = BetaToolType.Custom,
                 },
             ],
-            TopK = 5,
-            TopP = 0.7,
             Betas = [AnthropicBeta.MessageBatches2024_09_24],
             UserProfileID = "anthropic-user-profile-id",
             WorkspaceID = "wrkspc_011CZkZaBF1tNoB5wlCeusgy",
@@ -727,12 +661,9 @@ public class MessageCreateParamsTest : TestBase
             ServiceTier = null,
             StopSequences = null,
             System = null,
-            Temperature = null,
             Thinking = null,
             ToolChoice = null,
             Tools = null,
-            TopK = null,
-            TopP = null,
             Betas = null,
             UserProfileID = null,
             WorkspaceID = null,
@@ -750,18 +681,12 @@ public class MessageCreateParamsTest : TestBase
         Assert.False(parameters.RawBodyData.ContainsKey("stop_sequences"));
         Assert.Null(parameters.System);
         Assert.False(parameters.RawBodyData.ContainsKey("system"));
-        Assert.Null(parameters.Temperature);
-        Assert.False(parameters.RawBodyData.ContainsKey("temperature"));
         Assert.Null(parameters.Thinking);
         Assert.False(parameters.RawBodyData.ContainsKey("thinking"));
         Assert.Null(parameters.ToolChoice);
         Assert.False(parameters.RawBodyData.ContainsKey("tool_choice"));
         Assert.Null(parameters.Tools);
         Assert.False(parameters.RawBodyData.ContainsKey("tools"));
-        Assert.Null(parameters.TopK);
-        Assert.False(parameters.RawBodyData.ContainsKey("top_k"));
-        Assert.Null(parameters.TopP);
-        Assert.False(parameters.RawBodyData.ContainsKey("top_p"));
         Assert.Null(parameters.Betas);
         Assert.False(parameters.RawHeaderData.ContainsKey("anthropic-beta"));
         Assert.Null(parameters.UserProfileID);
@@ -776,16 +701,7 @@ public class MessageCreateParamsTest : TestBase
         var parameters = new MessageCreateParams
         {
             MaxTokens = 1024,
-            Messages =
-            [
-                new()
-                {
-                    Content = "Hello, world",
-                    Role = Role.User,
-                    ClearAt = ClearAt.NextUserMessage,
-                    OutputConfig = new() { Effort = BetaSystemMessageOutputConfigEffort.Low },
-                },
-            ],
+            Messages = [new BetaUserMessageParam("Hello, world")],
             Model = Messages::Model.ClaudeOpus5_5,
             McpServers =
             [
@@ -832,7 +748,6 @@ public class MessageCreateParamsTest : TestBase
                     },
                 ]
             ),
-            Temperature = 1,
             Thinking = new BetaThinkingConfigAdaptive()
             {
                 BlockBinding = new()
@@ -872,8 +787,6 @@ public class MessageCreateParamsTest : TestBase
                     Type = BetaToolType.Custom,
                 },
             ],
-            TopK = 5,
-            TopP = 0.7,
             Betas = [AnthropicBeta.MessageBatches2024_09_24],
             UserProfileID = "anthropic-user-profile-id",
             WorkspaceID = "wrkspc_011CZkZaBF1tNoB5wlCeusgy",
@@ -899,6 +812,8 @@ public class MessageCreateParamsTest : TestBase
         Assert.False(parameters.RawBodyData.ContainsKey("output_format"));
         Assert.Null(parameters.Speed);
         Assert.False(parameters.RawBodyData.ContainsKey("speed"));
+        Assert.Null(parameters.Thread);
+        Assert.False(parameters.RawBodyData.ContainsKey("thread"));
     }
 
     [Fact]
@@ -907,16 +822,7 @@ public class MessageCreateParamsTest : TestBase
         var parameters = new MessageCreateParams
         {
             MaxTokens = 1024,
-            Messages =
-            [
-                new()
-                {
-                    Content = "Hello, world",
-                    Role = Role.User,
-                    ClearAt = ClearAt.NextUserMessage,
-                    OutputConfig = new() { Effort = BetaSystemMessageOutputConfigEffort.Low },
-                },
-            ],
+            Messages = [new BetaUserMessageParam("Hello, world")],
             Model = Messages::Model.ClaudeOpus5_5,
             McpServers =
             [
@@ -963,7 +869,6 @@ public class MessageCreateParamsTest : TestBase
                     },
                 ]
             ),
-            Temperature = 1,
             Thinking = new BetaThinkingConfigAdaptive()
             {
                 BlockBinding = new()
@@ -1003,8 +908,6 @@ public class MessageCreateParamsTest : TestBase
                     Type = BetaToolType.Custom,
                 },
             ],
-            TopK = 5,
-            TopP = 0.7,
             Betas = [AnthropicBeta.MessageBatches2024_09_24],
             UserProfileID = "anthropic-user-profile-id",
             WorkspaceID = "wrkspc_011CZkZaBF1tNoB5wlCeusgy",
@@ -1019,6 +922,7 @@ public class MessageCreateParamsTest : TestBase
             InferenceGeo = null,
             OutputFormat = null,
             Speed = null,
+            Thread = null,
         };
 
         Assert.Null(parameters.CacheControl);
@@ -1041,6 +945,8 @@ public class MessageCreateParamsTest : TestBase
         Assert.True(parameters.RawBodyData.ContainsKey("output_format"));
         Assert.Null(parameters.Speed);
         Assert.True(parameters.RawBodyData.ContainsKey("speed"));
+        Assert.Null(parameters.Thread);
+        Assert.True(parameters.RawBodyData.ContainsKey("thread"));
     }
 
     [Fact]
@@ -1049,24 +955,13 @@ public class MessageCreateParamsTest : TestBase
         MessageCreateParams parameters = new()
         {
             MaxTokens = 1024,
-            Messages =
-            [
-                new()
-                {
-                    Content = "Hello, world",
-                    Role = Role.User,
-                    ClearAt = ClearAt.NextUserMessage,
-                    OutputConfig = new() { Effort = BetaSystemMessageOutputConfigEffort.Low },
-                },
-            ],
+            Messages = [new BetaUserMessageParam("Hello, world")],
             Model = Messages::Model.ClaudeOpus5_5,
         };
 
         var url = parameters.Url(new() { ApiKey = "my-anthropic-api-key" });
 
-        Assert.True(
-            TestBase.UrisEqual(new Uri("https://api.anthropic.com/v1/messages?beta=true"), url)
-        );
+        Assert.True(TestBase.UrisEqual(new Uri("https://api.anthropic.com/v1/messages"), url));
     }
 
     [Fact]
@@ -1076,16 +971,7 @@ public class MessageCreateParamsTest : TestBase
         MessageCreateParams parameters = new()
         {
             MaxTokens = 1024,
-            Messages =
-            [
-                new()
-                {
-                    Content = "Hello, world",
-                    Role = Role.User,
-                    ClearAt = ClearAt.NextUserMessage,
-                    OutputConfig = new() { Effort = BetaSystemMessageOutputConfigEffort.Low },
-                },
-            ],
+            Messages = [new BetaUserMessageParam("Hello, world")],
             Model = Messages::Model.ClaudeOpus5_5,
             Betas = [AnthropicBeta.MessageBatches2024_09_24],
             UserProfileID = "anthropic-user-profile-id",
@@ -1114,16 +1000,7 @@ public class MessageCreateParamsTest : TestBase
         var parameters = new MessageCreateParams
         {
             MaxTokens = 1024,
-            Messages =
-            [
-                new()
-                {
-                    Content = "Hello, world",
-                    Role = Role.User,
-                    ClearAt = ClearAt.NextUserMessage,
-                    OutputConfig = new() { Effort = BetaSystemMessageOutputConfigEffort.Low },
-                },
-            ],
+            Messages = [new BetaUserMessageParam("Hello, world")],
             Model = Messages::Model.ClaudeOpus5_5,
             CacheControl = new() { Ttl = Ttl.Ttl5m },
             Compaction = new() { Instructions = "instructions" },
@@ -1211,7 +1088,6 @@ public class MessageCreateParamsTest : TestBase
                     },
                 ]
             ),
-            Temperature = 1,
             Thinking = new BetaThinkingConfigAdaptive()
             {
                 BlockBinding = new()
@@ -1220,6 +1096,7 @@ public class MessageCreateParamsTest : TestBase
                 },
                 Display = Display.Summarized,
             },
+            Thread = new BetaThreadCreateParams(),
             ToolChoice = new BetaToolChoiceAuto() { DisableParallelToolUse = true },
             Tools =
             [
@@ -1251,8 +1128,6 @@ public class MessageCreateParamsTest : TestBase
                     Type = BetaToolType.Custom,
                 },
             ],
-            TopK = 5,
-            TopP = 0.7,
             Betas = [AnthropicBeta.MessageBatches2024_09_24],
             UserProfileID = "anthropic-user-profile-id",
             WorkspaceID = "wrkspc_011CZkZaBF1tNoB5wlCeusgy",

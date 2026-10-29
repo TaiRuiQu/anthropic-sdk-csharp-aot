@@ -126,7 +126,8 @@ public sealed record class BetaPlugin : JsonModel
     }
 
     /// <summary>
-    /// The version string the served version's manifest declares.
+    /// The served version's manifest `version`, normalized for display, or `null`
+    /// (the Plugin Version's `manifest_version` says how and when).
     /// </summary>
     public required string? ManifestVersion
     {
@@ -220,9 +221,21 @@ public sealed record class BetaPlugin : JsonModel
     }
 
     /// <summary>
-    /// How far the served version reaches: `remote` when it declares an MCP server
-    /// or a CLI, `privileged` when it declares a hook, monitor, language server or
-    /// settings but nothing remote, `contained` otherwise; null when not classifiable.
+    /// How far the served version reaches, or `null` if it is not classified.
+    ///
+    /// <para>`remote` means it declares an MCP server or a CLI. `privileged` means
+    /// it declares no MCP server or CLI, but declares a hook, monitor, language server,
+    /// or settings, or has a skill, command, or other Markdown file whose frontmatter
+    /// pre-approves tools (`allowed-tools` with any value other than an empty one
+    /// or one that names only `AskUserQuestion`, `TodoWrite`, and `ToolSearch`).
+    /// Otherwise it is `contained`.</para>
+    ///
+    /// <para>If the frontmatter of a skill, command, or other Markdown file that
+    /// could change the value could not be read, or was past a size limit, the version
+    /// is `null` or `privileged` (or `remote`, if it declares an MCP server or a
+    /// CLI), not `contained`. The value is normally worked out when a version is
+    /// stored, under the rules of that time, so an older version can be `null`, or
+    /// `contained` where the same files stored today would be `privileged` or `null`.</para>
     /// </summary>
     public required ApiEnum<string, Reach>? Reach
     {
@@ -248,8 +261,11 @@ public sealed record class BetaPlugin : JsonModel
     }
 
     /// <summary>
-    /// False while the served version follows each new version; true once it has
-    /// been pinned to one.
+    /// True once the served version has been pinned, through Update Plugin or in
+    /// claude.ai. While false, a new version normally becomes the served version
+    /// when it is stored. While the newest version is not the served version, as
+    /// when a version saved in claude.ai is waiting for its content scan, `served_version_id`
+    /// differs from `latest_version_id`.
     /// </summary>
     public required bool ServedVersionPinned
     {
@@ -275,7 +291,10 @@ public sealed record class BetaPlugin : JsonModel
     }
 
     /// <summary>
-    /// RFC 3339. Moves on a new version and on a served-version change; a change
+    /// RFC 3339. Moves on a served-version change (including pinning an unpinned
+    /// Plugin to the version it already serves) and, normally, on a new version.
+    /// A version saved in claude.ai that waits for its content scan moves it when
+    /// it becomes the served version, and not necessarily when it is stored. A change
     /// to the Plugin's installation settings or shares does not move it.
     /// </summary>
     public required System::DateTimeOffset UpdatedAt
@@ -379,15 +398,18 @@ public record class CreatedBy : ModelBase
         }
     }
 
-    public JsonElement Type
+    public ApiEnum<string, CreatedByType> Type
     {
         get
         {
             return this.Value switch
             {
-                BetaPluginUserActor x => x.Type,
-                BetaPluginApiActor x => x.Type,
-                _ => WrappedJsonSerializer.GetNotNullStructProperty<JsonElement>(this.Json, "type"),
+                BetaPluginUserActor _ => CreatedByType.UserActor,
+                BetaPluginApiActor _ => CreatedByType.ApiActor,
+                _ => WrappedJsonSerializer.GetNotNullClassProperty<ApiEnum<string, CreatedByType>>(
+                    this.Json,
+                    "type"
+                ),
             };
         }
     }
@@ -658,6 +680,50 @@ sealed class CreatedByConverter : JsonConverter<CreatedBy?>
     }
 }
 
+[JsonConverter(typeof(CreatedByTypeConverter))]
+public enum CreatedByType
+{
+    UserActor,
+    ApiActor,
+}
+
+sealed class CreatedByTypeConverter : JsonConverter<CreatedByType>
+{
+    public override CreatedByType Read(
+        ref Utf8JsonReader reader,
+        System::Type typeToConvert,
+        JsonSerializerOptions options
+    )
+    {
+        return JsonSerializer.Deserialize<string>(ref reader, options) switch
+        {
+            "user_actor" => CreatedByType.UserActor,
+            "api_actor" => CreatedByType.ApiActor,
+            _ => (CreatedByType)(-1),
+        };
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        CreatedByType value,
+        JsonSerializerOptions options
+    )
+    {
+        JsonSerializer.Serialize(
+            writer,
+            value switch
+            {
+                CreatedByType.UserActor => "user_actor",
+                CreatedByType.ApiActor => "api_actor",
+                _ => throw new AnthropicInvalidDataException(
+                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
+                ),
+            },
+            options
+        );
+    }
+}
+
 /// <summary>
 /// Organization-owned Plugin: the organization-wide installation setting every member
 /// gets unless an RBAC Group they belong to holds its own — the Plugin's own setting,
@@ -738,15 +804,18 @@ public record class Owner : ModelBase
         }
     }
 
-    public JsonElement Type
+    public ApiEnum<string, OwnerTypeValue> Type
     {
         get
         {
             return this.Value switch
             {
-                BetaPluginOwnerOrganization x => x.Type,
-                BetaPluginOwnerUser x => x.Type,
-                _ => WrappedJsonSerializer.GetNotNullStructProperty<JsonElement>(this.Json, "type"),
+                BetaPluginOwnerOrganization _ => OwnerTypeValue.Organization,
+                BetaPluginOwnerUser _ => OwnerTypeValue.User,
+                _ => WrappedJsonSerializer.GetNotNullClassProperty<ApiEnum<string, OwnerTypeValue>>(
+                    this.Json,
+                    "type"
+                ),
             };
         }
     }
@@ -1011,10 +1080,66 @@ sealed class OwnerConverter : JsonConverter<Owner>
     }
 }
 
+[JsonConverter(typeof(OwnerTypeValueConverter))]
+public enum OwnerTypeValue
+{
+    Organization,
+    User,
+}
+
+sealed class OwnerTypeValueConverter : JsonConverter<OwnerTypeValue>
+{
+    public override OwnerTypeValue Read(
+        ref Utf8JsonReader reader,
+        System::Type typeToConvert,
+        JsonSerializerOptions options
+    )
+    {
+        return JsonSerializer.Deserialize<string>(ref reader, options) switch
+        {
+            "organization" => OwnerTypeValue.Organization,
+            "user" => OwnerTypeValue.User,
+            _ => (OwnerTypeValue)(-1),
+        };
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        OwnerTypeValue value,
+        JsonSerializerOptions options
+    )
+    {
+        JsonSerializer.Serialize(
+            writer,
+            value switch
+            {
+                OwnerTypeValue.Organization => "organization",
+                OwnerTypeValue.User => "user",
+                _ => throw new AnthropicInvalidDataException(
+                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
+                ),
+            },
+            options
+        );
+    }
+}
+
 /// <summary>
-/// How far the served version reaches: `remote` when it declares an MCP server or
-/// a CLI, `privileged` when it declares a hook, monitor, language server or settings
-/// but nothing remote, `contained` otherwise; null when not classifiable.
+/// How far the served version reaches, or `null` if it is not classified.
+///
+/// <para>`remote` means it declares an MCP server or a CLI. `privileged` means it
+/// declares no MCP server or CLI, but declares a hook, monitor, language server,
+/// or settings, or has a skill, command, or other Markdown file whose frontmatter
+/// pre-approves tools (`allowed-tools` with any value other than an empty one or
+/// one that names only `AskUserQuestion`, `TodoWrite`, and `ToolSearch`). Otherwise
+/// it is `contained`.</para>
+///
+/// <para>If the frontmatter of a skill, command, or other Markdown file that could
+/// change the value could not be read, or was past a size limit, the version is `null`
+/// or `privileged` (or `remote`, if it declares an MCP server or a CLI), not `contained`.
+/// The value is normally worked out when a version is stored, under the rules of
+/// that time, so an older version can be `null`, or `contained` where the same files
+/// stored today would be `privileged` or `null`.</para>
 /// </summary>
 [JsonConverter(typeof(ReachConverter))]
 public enum Reach

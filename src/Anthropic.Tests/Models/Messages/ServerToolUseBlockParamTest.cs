@@ -13,7 +13,7 @@ public class ServerToolUseBlockParamTest : TestBase
     {
         var model = new ServerToolUseBlockParam
         {
-            ID = "srvtoolu_SQfNkl1n_JR_",
+            ID = "srvtoolu_c",
             Input = new Dictionary<string, JsonElement>()
             {
                 { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -23,7 +23,7 @@ public class ServerToolUseBlockParamTest : TestBase
             Caller = new DirectCaller(),
         };
 
-        string expectedID = "srvtoolu_SQfNkl1n_JR_";
+        string expectedID = "srvtoolu_c";
         Dictionary<string, JsonElement> expectedInput = new()
         {
             { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -53,7 +53,7 @@ public class ServerToolUseBlockParamTest : TestBase
     {
         var model = new ServerToolUseBlockParam
         {
-            ID = "srvtoolu_SQfNkl1n_JR_",
+            ID = "srvtoolu_c",
             Input = new Dictionary<string, JsonElement>()
             {
                 { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -77,7 +77,7 @@ public class ServerToolUseBlockParamTest : TestBase
     {
         var model = new ServerToolUseBlockParam
         {
-            ID = "srvtoolu_SQfNkl1n_JR_",
+            ID = "srvtoolu_c",
             Input = new Dictionary<string, JsonElement>()
             {
                 { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -94,7 +94,7 @@ public class ServerToolUseBlockParamTest : TestBase
         );
         Assert.NotNull(deserialized);
 
-        string expectedID = "srvtoolu_SQfNkl1n_JR_";
+        string expectedID = "srvtoolu_c";
         Dictionary<string, JsonElement> expectedInput = new()
         {
             { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -124,7 +124,7 @@ public class ServerToolUseBlockParamTest : TestBase
     {
         var model = new ServerToolUseBlockParam
         {
-            ID = "srvtoolu_SQfNkl1n_JR_",
+            ID = "srvtoolu_c",
             Input = new Dictionary<string, JsonElement>()
             {
                 { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -142,7 +142,7 @@ public class ServerToolUseBlockParamTest : TestBase
     {
         var model = new ServerToolUseBlockParam
         {
-            ID = "srvtoolu_SQfNkl1n_JR_",
+            ID = "srvtoolu_c",
             Input = new Dictionary<string, JsonElement>()
             {
                 { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -160,7 +160,7 @@ public class ServerToolUseBlockParamTest : TestBase
     {
         var model = new ServerToolUseBlockParam
         {
-            ID = "srvtoolu_SQfNkl1n_JR_",
+            ID = "srvtoolu_c",
             Input = new Dictionary<string, JsonElement>()
             {
                 { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -177,7 +177,7 @@ public class ServerToolUseBlockParamTest : TestBase
     {
         var model = new ServerToolUseBlockParam
         {
-            ID = "srvtoolu_SQfNkl1n_JR_",
+            ID = "srvtoolu_c",
             Input = new Dictionary<string, JsonElement>()
             {
                 { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -198,7 +198,7 @@ public class ServerToolUseBlockParamTest : TestBase
     {
         var model = new ServerToolUseBlockParam
         {
-            ID = "srvtoolu_SQfNkl1n_JR_",
+            ID = "srvtoolu_c",
             Input = new Dictionary<string, JsonElement>()
             {
                 { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -221,7 +221,7 @@ public class ServerToolUseBlockParamTest : TestBase
     {
         var model = new ServerToolUseBlockParam
         {
-            ID = "srvtoolu_SQfNkl1n_JR_",
+            ID = "srvtoolu_c",
             Input = new Dictionary<string, JsonElement>()
             {
                 { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -241,7 +241,7 @@ public class ServerToolUseBlockParamTest : TestBase
     {
         var model = new ServerToolUseBlockParam
         {
-            ID = "srvtoolu_SQfNkl1n_JR_",
+            ID = "srvtoolu_c",
             Input = new Dictionary<string, JsonElement>()
             {
                 { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -259,7 +259,7 @@ public class ServerToolUseBlockParamTest : TestBase
     {
         var model = new ServerToolUseBlockParam
         {
-            ID = "srvtoolu_SQfNkl1n_JR_",
+            ID = "srvtoolu_c",
             Input = new Dictionary<string, JsonElement>()
             {
                 { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -276,7 +276,7 @@ public class ServerToolUseBlockParamTest : TestBase
     {
         var model = new ServerToolUseBlockParam
         {
-            ID = "srvtoolu_SQfNkl1n_JR_",
+            ID = "srvtoolu_c",
             Input = new Dictionary<string, JsonElement>()
             {
                 { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -296,7 +296,7 @@ public class ServerToolUseBlockParamTest : TestBase
     {
         var model = new ServerToolUseBlockParam
         {
-            ID = "srvtoolu_SQfNkl1n_JR_",
+            ID = "srvtoolu_c",
             Input = new Dictionary<string, JsonElement>()
             {
                 { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -315,7 +315,7 @@ public class ServerToolUseBlockParamTest : TestBase
     {
         var model = new ServerToolUseBlockParam
         {
-            ID = "srvtoolu_SQfNkl1n_JR_",
+            ID = "srvtoolu_c",
             Input = new Dictionary<string, JsonElement>()
             {
                 { "foo", JsonSerializer.SerializeToElement("bar") },
@@ -411,14 +411,14 @@ public class ServerToolUseBlockParamCallerTest : TestBase
     [Fact]
     public void ServerToolValidationWorks()
     {
-        ServerToolUseBlockParamCaller value = new ServerToolCaller("srvtoolu_SQfNkl1n_JR_");
+        ServerToolUseBlockParamCaller value = new ServerToolCaller("srvtoolu_c");
         value.Validate();
     }
 
     [Fact]
     public void ServerToolCaller20260120ValidationWorks()
     {
-        ServerToolUseBlockParamCaller value = new ServerToolCaller20260120("srvtoolu_SQfNkl1n_JR_");
+        ServerToolUseBlockParamCaller value = new ServerToolCaller20260120("srvtoolu_c");
         value.Validate();
     }
 
@@ -438,7 +438,7 @@ public class ServerToolUseBlockParamCallerTest : TestBase
     [Fact]
     public void ServerToolSerializationRoundtripWorks()
     {
-        ServerToolUseBlockParamCaller value = new ServerToolCaller("srvtoolu_SQfNkl1n_JR_");
+        ServerToolUseBlockParamCaller value = new ServerToolCaller("srvtoolu_c");
         string element = JsonSerializer.Serialize(value, ModelBase.SerializerOptions);
         var deserialized = JsonSerializer.Deserialize<ServerToolUseBlockParamCaller>(
             element,
@@ -451,7 +451,7 @@ public class ServerToolUseBlockParamCallerTest : TestBase
     [Fact]
     public void ServerToolCaller20260120SerializationRoundtripWorks()
     {
-        ServerToolUseBlockParamCaller value = new ServerToolCaller20260120("srvtoolu_SQfNkl1n_JR_");
+        ServerToolUseBlockParamCaller value = new ServerToolCaller20260120("srvtoolu_c");
         string element = JsonSerializer.Serialize(value, ModelBase.SerializerOptions);
         var deserialized = JsonSerializer.Deserialize<ServerToolUseBlockParamCaller>(
             element,
@@ -462,6 +462,27 @@ public class ServerToolUseBlockParamCallerTest : TestBase
     }
 
     [Fact]
+    public void DirectTypeWorks()
+    {
+        ServerToolUseBlockParamCaller value = new DirectCaller();
+        Assert.Equal(ServerToolUseBlockParamCallerType.Direct, value.Type.Value());
+    }
+
+    [Fact]
+    public void ServerToolTypeWorks()
+    {
+        ServerToolUseBlockParamCaller value = new ServerToolCaller("srvtoolu_c");
+        Assert.Equal(ServerToolUseBlockParamCallerType.CodeExecution20250825, value.Type.Value());
+    }
+
+    [Fact]
+    public void ServerToolCaller20260120TypeWorks()
+    {
+        ServerToolUseBlockParamCaller value = new ServerToolCaller20260120("srvtoolu_c");
+        Assert.Equal(ServerToolUseBlockParamCallerType.CodeExecution20260120, value.Type.Value());
+    }
+
+    [Fact]
     public void UnknownVariantCommonProperties_Works()
     {
         ServerToolUseBlockParamCaller value = new(
@@ -469,17 +490,18 @@ public class ServerToolUseBlockParamCallerTest : TestBase
                 """
                 {
                   "type": "direct",
-                  "tool_id": "srvtoolu_SQfNkl1n_JR_"
+                  "tool_id": "srvtoolu_c"
                 }
                 """
             )
         );
         Assert.Throws<AnthropicInvalidDataException>(() => value.Validate());
 
-        JsonElement expectedType = JsonSerializer.SerializeToElement("direct");
-        string expectedToolID = "srvtoolu_SQfNkl1n_JR_";
+        ApiEnum<string, ServerToolUseBlockParamCallerType> expectedType =
+            ServerToolUseBlockParamCallerType.Direct;
+        string expectedToolID = "srvtoolu_c";
 
-        Assert.True(JsonElement.DeepEquals(expectedType, value.Type));
+        Assert.Equal(expectedType, value.Type);
         Assert.Equal(expectedToolID, value.ToolID);
 
         ServerToolUseBlockParamCaller emptyValue = new(
@@ -502,5 +524,63 @@ public class ServerToolUseBlockParamCallerTest : TestBase
         );
 
         Assert.Null(mismatchedValue.ToolID);
+    }
+}
+
+public class ServerToolUseBlockParamCallerTypeTest : TestBase
+{
+    [Theory]
+    [InlineData(ServerToolUseBlockParamCallerType.Direct)]
+    [InlineData(ServerToolUseBlockParamCallerType.CodeExecution20250825)]
+    [InlineData(ServerToolUseBlockParamCallerType.CodeExecution20260120)]
+    public void Validation_Works(ServerToolUseBlockParamCallerType rawValue)
+    {
+        // force implicit conversion because Theory can't do that for us
+        ApiEnum<string, ServerToolUseBlockParamCallerType> value = rawValue;
+        value.Validate();
+    }
+
+    [Fact]
+    public void InvalidEnumValidationThrows_Works()
+    {
+        var value = JsonSerializer.Deserialize<ApiEnum<string, ServerToolUseBlockParamCallerType>>(
+            JsonSerializer.SerializeToElement("invalid value"),
+            ModelBase.SerializerOptions
+        );
+
+        Assert.NotNull(value);
+        Assert.Throws<AnthropicInvalidDataException>(() => value.Validate());
+    }
+
+    [Theory]
+    [InlineData(ServerToolUseBlockParamCallerType.Direct)]
+    [InlineData(ServerToolUseBlockParamCallerType.CodeExecution20250825)]
+    [InlineData(ServerToolUseBlockParamCallerType.CodeExecution20260120)]
+    public void SerializationRoundtrip_Works(ServerToolUseBlockParamCallerType rawValue)
+    {
+        // force implicit conversion because Theory can't do that for us
+        ApiEnum<string, ServerToolUseBlockParamCallerType> value = rawValue;
+
+        string json = JsonSerializer.Serialize(value, ModelBase.SerializerOptions);
+        var deserialized = JsonSerializer.Deserialize<
+            ApiEnum<string, ServerToolUseBlockParamCallerType>
+        >(json, ModelBase.SerializerOptions);
+
+        Assert.Equal(value, deserialized);
+    }
+
+    [Fact]
+    public void InvalidEnumSerializationRoundtrip_Works()
+    {
+        var value = JsonSerializer.Deserialize<ApiEnum<string, ServerToolUseBlockParamCallerType>>(
+            JsonSerializer.SerializeToElement("invalid value"),
+            ModelBase.SerializerOptions
+        );
+        string json = JsonSerializer.Serialize(value, ModelBase.SerializerOptions);
+        var deserialized = JsonSerializer.Deserialize<
+            ApiEnum<string, ServerToolUseBlockParamCallerType>
+        >(json, ModelBase.SerializerOptions);
+
+        Assert.Equal(value, deserialized);
     }
 }

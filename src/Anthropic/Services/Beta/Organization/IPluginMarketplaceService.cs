@@ -116,9 +116,9 @@ public interface IPluginMarketplaceService
     /// part, with some files left out. An archive that cannot be read as a marketplace
     /// is reported, not refused: the response is a report with `valid: false`. Plugin
     /// sources outside the marketplace are fetched anonymously from GitHub, so a
-    /// private one is reported as not found; a source on any other host is not fetched
-    /// here, and the report notes that it will be checked when the marketplace actually
-    /// synchronizes.</para>
+    /// private one is reported as not found or as needing a GitHub sign-in; a source on
+    /// any other host is not fetched here, and the report notes that it will be checked
+    /// when the marketplace actually synchronizes.</para>
     ///
     /// <para>Nothing is recorded on the Compliance API activity feed.</para>
     ///
@@ -153,9 +153,9 @@ public interface IPluginMarketplaceService
     /// part, with some files left out. A repository that is missing, private, or has no
     /// such branch or commit is reported, not refused: the response is a report with
     /// `valid: false`. Plugin sources outside the marketplace are fetched anonymously
-    /// from GitHub, so a private one is reported as not found; a source on any other
-    /// host is not fetched here, and the report notes that it will be checked when the
-    /// marketplace actually synchronizes.</para>
+    /// from GitHub, so a private one is reported as not found or as needing a GitHub
+    /// sign-in; a source on any other host is not fetched here, and the report notes
+    /// that it will be checked when the marketplace actually synchronizes.</para>
     ///
     /// <para>Nothing is recorded on the Compliance API activity feed.</para>
     ///
@@ -195,7 +195,7 @@ public interface IPluginMarketplaceServiceWithRawResponse
     );
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>get /v1/organizations/plugin_marketplaces/{marketplace_id}?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>get /v1/organizations/plugin_marketplaces/{marketplace_id}</c>, but is otherwise the
     /// same as <see cref="IPluginMarketplaceService.Retrieve(PluginMarketplaceRetrieveParams, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<BetaPluginMarketplace>> Retrieve(
@@ -211,7 +211,7 @@ public interface IPluginMarketplaceServiceWithRawResponse
     );
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>post /v1/organizations/plugin_marketplaces/{marketplace_id}?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>post /v1/organizations/plugin_marketplaces/{marketplace_id}</c>, but is otherwise the
     /// same as <see cref="IPluginMarketplaceService.Update(PluginMarketplaceUpdateParams, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<BetaPluginMarketplace>> Update(
@@ -227,7 +227,7 @@ public interface IPluginMarketplaceServiceWithRawResponse
     );
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>get /v1/organizations/plugin_marketplaces?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>get /v1/organizations/plugin_marketplaces</c>, but is otherwise the
     /// same as <see cref="IPluginMarketplaceService.List(PluginMarketplaceListParams?, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<PluginMarketplaceListPage>> List(
@@ -236,7 +236,7 @@ public interface IPluginMarketplaceServiceWithRawResponse
     );
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>post /v1/organizations/plugin_marketplaces/validate_archive?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>post /v1/organizations/plugin_marketplaces/validate_archive</c>, but is otherwise the
     /// same as <see cref="IPluginMarketplaceService.ValidateArchive(PluginMarketplaceValidateArchiveParams, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<BetaPluginMarketplaceValidationReport>> ValidateArchive(
@@ -245,7 +245,7 @@ public interface IPluginMarketplaceServiceWithRawResponse
     );
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>post /v1/organizations/plugin_marketplaces/validate_repository?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>post /v1/organizations/plugin_marketplaces/validate_repository</c>, but is otherwise the
     /// same as <see cref="IPluginMarketplaceService.ValidateRepository(PluginMarketplaceValidateRepositoryParams, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<BetaPluginMarketplaceValidationReport>> ValidateRepository(

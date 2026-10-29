@@ -58,7 +58,9 @@ public class AnthropicGoogleCloudClientTests : IDisposable
     /// </summary>
     private record class BlankParams : ParamsBase
     {
-        public override Uri Url(ClientOptions options) => new($"{options.BaseUrl}/v1/messages");
+        public string Path { get; set; } = "/v1/messages";
+
+        public override Uri Url(ClientOptions options) => new($"{options.BaseUrl}{Path}");
 
         internal override void AddHeadersToRequest(
             HttpRequestMessage request,
@@ -144,16 +146,57 @@ public class AnthropicGoogleCloudClientTests : IDisposable
     private static Func<CancellationToken, Task<string>> StaticToken(string token) =>
         _ => Task.FromResult(token);
 
+    private const string WorkspaceBaseUrl =
+        "https://claude.googleapis.com/v1/projects/my-proj"
+        + "/locations/us-central1/workspaces/ws-123/invoke";
+
+    private const string OrganizationBaseUrl =
+        "https://claude.googleapis.com/v1/projects/my-proj"
+        + "/locations/us-central1/claudeOrganization/invoke";
+
+    private static GoogleCloudClientOptions DerivedOptions(
+        HttpClient httpClient,
+        string? workspaceId = "ws-123"
+    ) =>
+        new()
+        {
+            TokenProvider = StaticToken("tok"),
+            Project = "my-proj",
+            Location = "us-central1",
+            WorkspaceId = workspaceId,
+            ClientOptions = new() { HttpClient = httpClient },
+        };
+
+    private static async Task SendWorkspaceRequest(IAnthropicClient client)
+    {
+        using var response = await client.WithRawResponse.Execute(
+            new HttpRequest<BlankParams> { Method = HttpMethod.Post, Params = new() },
+            TestContext.Current.CancellationToken
+        );
+    }
+
+    private static async Task SendOrganizationRequest(IAnthropicClient client)
+    {
+        await client.Beta.Organization.Workspaces.List(
+            cancellationToken: TestContext.Current.CancellationToken
+        );
+    }
+
+    private static async Task SendUserProfilesRequest(AnthropicGoogleCloudClient client)
+    {
+        await client.Beta.UserProfiles.List(
+            cancellationToken: TestContext.Current.CancellationToken
+        );
+    }
+
     #region Validation
 
     [Fact]
-    public void Constructor_WithoutWorkspaceId_Throws()
+    public void Constructor_WithoutWorkspaceId_DoesNotThrow()
     {
-        var ex = Assert.Throws<AnthropicException>(() =>
-            NewClient(new() { TokenProvider = StaticToken("tok"), BaseUrl = "http://localhost" })
-        );
-        Assert.Contains("Workspace ID is required", ex.Message);
-        Assert.Contains("ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID", ex.Message);
+        NewClient(new() { TokenProvider = StaticToken("tok"), BaseUrl = "http://localhost" });
+        NewClient(new() { TokenProvider = StaticToken("tok"), Project = "proj" });
+        NewClient(new() { SkipAuth = true, Project = "proj" });
     }
 
     [Fact]
@@ -185,16 +228,6 @@ public class AnthropicGoogleCloudClientTests : IDisposable
             }
         );
         Assert.Contains("/locations/global/", client.BaseUrl);
-    }
-
-    [Fact]
-    public void Constructor_SkipAuthWithoutBaseUrlOrWorkspace_Throws()
-    {
-        var ex = Assert.Throws<AnthropicException>(() =>
-            NewClient(new() { SkipAuth = true, Project = "proj" })
-        );
-        Assert.Contains("Workspace ID is required", ex.Message);
-        Assert.Contains("ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID", ex.Message);
     }
 
     [Fact]
@@ -366,7 +399,7 @@ public class AnthropicGoogleCloudClientTests : IDisposable
             }
         );
         Assert.Equal(
-            "https://claude.googleapis.com/v1alpha/projects/my-proj"
+            "https://claude.googleapis.com/v1/projects/my-proj"
                 + "/locations/us-central1/workspaces/ws-123/invoke",
             client.BaseUrl
         );
@@ -384,7 +417,7 @@ public class AnthropicGoogleCloudClientTests : IDisposable
             }
         );
         Assert.Equal(
-            "https://claude.googleapis.com/v1alpha/projects/my-proj"
+            "https://claude.googleapis.com/v1/projects/my-proj"
                 + "/locations/global/workspaces/ws-123/invoke",
             client.BaseUrl
         );
@@ -467,8 +500,10 @@ public class AnthropicGoogleCloudClientTests : IDisposable
     /// First-party Anthropic env vars must never leak onto the wire — even when set,
     /// no <c>X-Api-Key</c> and no first-party <c>Authorization</c> reach the gateway.
     /// </summary>
-    [Fact]
-    public async Task Isolation_FirstPartyEnvVarsNotSent()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Isolation_FirstPartyEnvVarsNotSent(bool freshOptions)
     {
         Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", "first-party-api-key");
         Environment.SetEnvironmentVariable("ANTHROPIC_AUTH_TOKEN", "first-party-auth-token");
@@ -482,12 +517,47 @@ public class AnthropicGoogleCloudClientTests : IDisposable
                 BaseUrl = "http://localhost",
             }
         );
+        if (freshOptions)
+        {
+            client = Assert.IsType<AnthropicGoogleCloudClient>(
+                client.WithOptions(opts => new ClientOptions { BaseUrl = opts.BaseUrl })
+            );
+        }
         var req = await SendOneRequest(client);
 
         Assert.False(req.Headers.Contains("X-Api-Key"));
         var auth = req.Headers.GetValues("Authorization").ToArray();
         Assert.Equal(["Bearer google-tok"], auth);
         Assert.Equal("http://localhost/v1/messages", req.RequestUri!.ToString());
+    }
+
+    [Fact]
+    public async Task Isolation_FirstPartyEnvVarsNotSent_RawResponseFreshOptions()
+    {
+        Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", "first-party-api-key");
+        Environment.SetEnvironmentVariable("ANTHROPIC_AUTH_TOKEN", "first-party-auth-token");
+
+        var client = NewClient(
+            new()
+            {
+                TokenProvider = StaticToken("google-tok"),
+                WorkspaceId = "ws",
+                BaseUrl = "http://localhost",
+            }
+        );
+        var (httpClient, captured) = CreateCapturingClient();
+        var raw = client.WithRawResponse.WithOptions(o => new ClientOptions
+        {
+            HttpClient = httpClient,
+            BaseUrl = o.BaseUrl,
+        });
+        await raw.Execute(
+            new HttpRequest<BlankParams> { Method = HttpMethod.Post, Params = new() },
+            TestContext.Current.CancellationToken
+        );
+
+        var req = Assert.Single(captured);
+        Assert.Equal("Bearer google-tok", req.Headers.GetValues("Authorization").Single());
     }
 
     [Fact]
@@ -544,7 +614,7 @@ public class AnthropicGoogleCloudClientTests : IDisposable
         Assert.False(req.Headers.Contains("anthropic-workspace-id"));
         // Default headers are present, so the absence above is a real negative — the
         // header pipeline ran and simply never adds the workspace header.
-        Assert.Equal("2023-06-01", req.Headers.GetValues("anthropic-version").Single());
+        Assert.True(req.Headers.Contains("anthropic-version"));
     }
 
     [Fact]
@@ -593,7 +663,7 @@ public class AnthropicGoogleCloudClientTests : IDisposable
             }
         );
         Assert.Equal(
-            "https://claude.googleapis.com/v1alpha/projects/proj"
+            "https://claude.googleapis.com/v1/projects/proj"
                 + "/locations/global/workspaces/ws-123/invoke",
             client.BaseUrl
         );
@@ -624,6 +694,371 @@ public class AnthropicGoogleCloudClientTests : IDisposable
         );
         var req = await SendOneRequest(client);
         Assert.False(req.Headers.Contains("anthropic-workspace-id"));
+    }
+
+    #endregion
+
+    #region Organization routing
+
+    [Fact]
+    public async Task OrganizationRoute_SentToOrganizationBase()
+    {
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(DerivedOptions(httpClient));
+
+        await SendOrganizationRequest(client);
+
+        var req = Assert.Single(captured);
+        Assert.Equal(
+            OrganizationBaseUrl + "/v1/organizations/workspaces",
+            req.RequestUri!.AbsoluteUri
+        );
+        Assert.Equal("Bearer tok", req.Headers.GetValues("Authorization").Single());
+        Assert.False(req.Headers.Contains("X-Api-Key"));
+    }
+
+    [Fact]
+    public async Task OrganizationRoute_NonBeta_SentToOrganizationBase()
+    {
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(DerivedOptions(httpClient));
+
+        await client.Organization.Retrieve(
+            cancellationToken: TestContext.Current.CancellationToken
+        );
+
+        var req = Assert.Single(captured);
+        Assert.Equal(OrganizationBaseUrl + "/v1/organizations/me", req.RequestUri!.AbsoluteUri);
+    }
+
+    [Fact]
+    public async Task UserProfilesRoute_SentToOrganizationBase()
+    {
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(DerivedOptions(httpClient));
+
+        await SendUserProfilesRequest(client);
+        await client.Beta.UserProfiles.Create(
+            cancellationToken: TestContext.Current.CancellationToken
+        );
+        await client.Beta.UserProfiles.Retrieve(
+            "uprof_123",
+            cancellationToken: TestContext.Current.CancellationToken
+        );
+        await client.Beta.UserProfiles.CreateEnrollmentUrl(
+            "uprof_123",
+            cancellationToken: TestContext.Current.CancellationToken
+        );
+
+        Assert.Equal(
+            [
+                OrganizationBaseUrl + "/v1/user_profiles",
+                OrganizationBaseUrl + "/v1/user_profiles",
+                OrganizationBaseUrl + "/v1/user_profiles/uprof_123",
+                OrganizationBaseUrl + "/v1/user_profiles/uprof_123/enrollment_url",
+            ],
+            captured.Select(req => req.RequestUri!.AbsoluteUri)
+        );
+        Assert.All(
+            captured,
+            req => Assert.Equal("Bearer tok", req.Headers.GetValues("Authorization").Single())
+        );
+    }
+
+    [Fact]
+    public async Task UserProfilesRoute_NeedsNoWorkspaceId()
+    {
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(DerivedOptions(httpClient, workspaceId: null));
+
+        await SendUserProfilesRequest(client);
+
+        var req = Assert.Single(captured);
+        Assert.Equal(OrganizationBaseUrl + "/v1/user_profiles", req.RequestUri!.AbsoluteUri);
+        Assert.Equal("Bearer tok", req.Headers.GetValues("Authorization").Single());
+    }
+
+    [Theory]
+    [InlineData("/v1/user_profiles", OrganizationBaseUrl)]
+    [InlineData("/v1/user_profiles?limit=1", OrganizationBaseUrl)]
+    [InlineData("/v1/user_profilesX", WorkspaceBaseUrl)]
+    public async Task UserProfilesRoute_MatchesWholePathSegment(string path, string expectedBaseUrl)
+    {
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(DerivedOptions(httpClient));
+
+        using var response = await client.WithRawResponse.Execute(
+            new HttpRequest<BlankParams>
+            {
+                Method = HttpMethod.Post,
+                Params = new() { Path = path },
+            },
+            TestContext.Current.CancellationToken
+        );
+
+        var req = Assert.Single(captured);
+        Assert.Equal(expectedBaseUrl + path, req.RequestUri!.AbsoluteUri);
+    }
+
+    [Fact]
+    public async Task WorkspaceRoute_SentToWorkspaceBase()
+    {
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(DerivedOptions(httpClient));
+
+        await SendWorkspaceRequest(client);
+
+        var req = Assert.Single(captured);
+        Assert.Equal(WorkspaceBaseUrl + "/v1/messages", req.RequestUri!.AbsoluteUri);
+        Assert.Equal("Bearer tok", req.Headers.GetValues("Authorization").Single());
+    }
+
+    [Fact]
+    public async Task OrganizationRoute_NeedsNoWorkspaceId()
+    {
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(DerivedOptions(httpClient, workspaceId: null));
+
+        await SendOrganizationRequest(client);
+
+        var req = Assert.Single(captured);
+        Assert.Equal(
+            OrganizationBaseUrl + "/v1/organizations/workspaces",
+            req.RequestUri!.AbsoluteUri
+        );
+        Assert.Equal("Bearer tok", req.Headers.GetValues("Authorization").Single());
+    }
+
+    [Fact]
+    public async Task OrganizationRoute_UsesResolvedProjectAndLocation()
+    {
+        Environment.SetEnvironmentVariable("GOOGLE_CLOUD_PROJECT", "fallback-proj");
+        Environment.SetEnvironmentVariable("ANTHROPIC_GOOGLE_CLOUD_LOCATION", "env-loc");
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(
+            new()
+            {
+                TokenProvider = StaticToken("tok"),
+                ClientOptions = new() { HttpClient = httpClient },
+            }
+        );
+
+        await SendOrganizationRequest(client);
+
+        var req = Assert.Single(captured);
+        Assert.Equal(
+            "https://claude.googleapis.com/v1/projects/fallback-proj"
+                + "/locations/env-loc/claudeOrganization/invoke"
+                + "/v1/organizations/workspaces",
+            req.RequestUri!.AbsoluteUri
+        );
+    }
+
+    [Fact]
+    public async Task WorkspaceRoute_WithoutWorkspaceId_ThrowsBeforeSending()
+    {
+        var tokenRequested = false;
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(
+            new()
+            {
+                TokenProvider = _ =>
+                {
+                    tokenRequested = true;
+                    return Task.FromResult("tok");
+                },
+                Project = "my-proj",
+                Location = "us-central1",
+                ClientOptions = new() { HttpClient = httpClient },
+            }
+        );
+
+        var ex = await Assert.ThrowsAsync<AnthropicException>(() => SendWorkspaceRequest(client));
+
+        Assert.Contains("WorkspaceId", ex.Message);
+        Assert.Contains("ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID", ex.Message);
+        Assert.Empty(captured);
+        Assert.False(tokenRequested);
+    }
+
+    [Fact]
+    public async Task ExplicitBaseUrl_TakesEveryRoute()
+    {
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(
+            new()
+            {
+                TokenProvider = StaticToken("tok"),
+                Project = "my-proj",
+                Location = "us-central1",
+                WorkspaceId = "ws-123",
+                BaseUrl = "http://localhost",
+                ClientOptions = new() { HttpClient = httpClient },
+            }
+        );
+
+        await SendOrganizationRequest(client);
+        await SendUserProfilesRequest(client);
+        await SendWorkspaceRequest(client);
+
+        Assert.Equal(
+            [
+                "http://localhost/v1/organizations/workspaces",
+                "http://localhost/v1/user_profiles",
+                "http://localhost/v1/messages",
+            ],
+            captured.Select(req => req.RequestUri!.AbsoluteUri)
+        );
+    }
+
+    [Fact]
+    public async Task EnvBaseUrl_TakesEveryRoute()
+    {
+        Environment.SetEnvironmentVariable("ANTHROPIC_GOOGLE_CLOUD_BASE_URL", "http://env-url");
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(DerivedOptions(httpClient));
+
+        await SendOrganizationRequest(client);
+        await SendWorkspaceRequest(client);
+
+        Assert.Equal(
+            ["http://env-url/v1/organizations/workspaces", "http://env-url/v1/messages"],
+            captured.Select(req => req.RequestUri!.AbsoluteUri)
+        );
+    }
+
+    [Fact]
+    public async Task AssignedBaseUrl_TakesEveryRoute()
+    {
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = new AnthropicGoogleCloudClient(DerivedOptions(httpClient))
+        {
+            BaseUrl = "http://localhost",
+        };
+
+        await SendOrganizationRequest(client);
+        await SendOrganizationRequest(client.WithOptions(opts => opts));
+
+        Assert.Equal(
+            [
+                "http://localhost/v1/organizations/workspaces",
+                "http://localhost/v1/organizations/workspaces",
+            ],
+            captured.Select(req => req.RequestUri!.AbsoluteUri)
+        );
+    }
+
+    [Fact]
+    public async Task WithOptions_AssignedBaseUrl_TakesEveryRoute()
+    {
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(DerivedOptions(httpClient))
+            .WithOptions(opts =>
+            {
+                opts.BaseUrl = "http://localhost";
+                return opts;
+            });
+
+        await SendOrganizationRequest(client);
+        await SendWorkspaceRequest(client);
+
+        Assert.Equal(
+            ["http://localhost/v1/organizations/workspaces", "http://localhost/v1/messages"],
+            captured.Select(req => req.RequestUri!.AbsoluteUri)
+        );
+    }
+
+    [Fact]
+    public async Task WithOptions_DerivedClient_KeepsRouting()
+    {
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(DerivedOptions(httpClient))
+            .WithOptions(opts =>
+            {
+                opts.MaxRetries = 0;
+                return opts;
+            });
+
+        await SendOrganizationRequest(client);
+        await SendWorkspaceRequest(client);
+
+        Assert.Equal(
+            [
+                OrganizationBaseUrl + "/v1/organizations/workspaces",
+                WorkspaceBaseUrl + "/v1/messages",
+            ],
+            captured.Select(req => req.RequestUri!.AbsoluteUri)
+        );
+    }
+
+    [Fact]
+    public async Task WithOptions_FreshOptions_KeepsRouting()
+    {
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(DerivedOptions(new HttpClient()))
+            .WithOptions(opts => new ClientOptions
+            {
+                HttpClient = httpClient,
+                BaseUrl = opts.BaseUrl,
+            });
+
+        await SendOrganizationRequest(client);
+
+        var req = Assert.Single(captured);
+        Assert.Equal(
+            OrganizationBaseUrl + "/v1/organizations/workspaces",
+            req.RequestUri!.AbsoluteUri
+        );
+        Assert.Equal("Bearer tok", req.Headers.GetValues("Authorization").Single());
+    }
+
+    [Fact]
+    public async Task WithOptions_NoWorkspaceId_ExplicitBaseUrl_TakesEveryRoute()
+    {
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = NewClient(
+                new()
+                {
+                    TokenProvider = StaticToken("tok"),
+                    BaseUrl = "http://localhost",
+                    ClientOptions = new() { HttpClient = httpClient },
+                }
+            )
+            .WithOptions(opts =>
+            {
+                opts.MaxRetries = 0;
+                return opts;
+            });
+
+        await SendOrganizationRequest(client);
+        await SendWorkspaceRequest(client);
+
+        Assert.Equal(
+            ["http://localhost/v1/organizations/workspaces", "http://localhost/v1/messages"],
+            captured.Select(req => req.RequestUri!.AbsoluteUri)
+        );
+    }
+
+    [Fact]
+    public async Task WithOptions_NoWorkspaceId_AssignedBaseUrl_TakesEveryRoute()
+    {
+        var (httpClient, captured) = CreateCapturingClient();
+        var client = new AnthropicGoogleCloudClient(DerivedOptions(httpClient, workspaceId: null))
+        {
+            BaseUrl = "http://localhost",
+        }.WithOptions(opts =>
+        {
+            opts.MaxRetries = 0;
+            return opts;
+        });
+
+        await SendOrganizationRequest(client);
+        await SendWorkspaceRequest(client);
+
+        Assert.Equal(
+            ["http://localhost/v1/organizations/workspaces", "http://localhost/v1/messages"],
+            captured.Select(req => req.RequestUri!.AbsoluteUri)
+        );
     }
 
     #endregion

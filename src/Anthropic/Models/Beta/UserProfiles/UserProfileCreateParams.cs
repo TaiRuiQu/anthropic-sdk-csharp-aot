@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -9,7 +10,6 @@ using System.Text.Json.Serialization;
 using Anthropic.Core;
 using Anthropic.Exceptions;
 using Anthropic.Services.Beta;
-using System = System;
 
 namespace Anthropic.Models.Beta.UserProfiles;
 
@@ -54,8 +54,8 @@ public record class UserProfileCreateParams : ParamsBase
 
     /// <summary>
     /// Platform's own identifier for this user. Not enforced unique. Maximum 255
-    /// characters. Accepted under the `user-profiles-2026-03-24` and `user-profiles-2026-08-18`
-    /// beta headers; under `user-profiles-2026-09-04` send `external_user_details.reference_id` instead.
+    /// characters. Legacy field, accepted only under the `user-profiles-2026-03-24`
+    /// and `user-profiles-2026-08-18` beta headers; without one of them, send `external_user_details.reference_id`.
     /// </summary>
     public string? ExternalID
     {
@@ -69,8 +69,9 @@ public record class UserProfileCreateParams : ParamsBase
 
     /// <summary>
     /// Details about the entity this profile represents, as the platform states them.
-    /// Every field is optional. Accepted under the `user-profiles-2026-09-04` beta
-    /// header only.
+    /// Every field is optional. Not accepted under the legacy `user-profiles-2026-03-24`
+    /// and `user-profiles-2026-08-18` beta headers, which take the top-level `external_id`
+    /// (and, under `user-profiles-2026-08-18`, `external_user_onboarded_at`) instead.
     /// </summary>
     public BetaUserProfileExternalUserDetailsParams? ExternalUserDetails
     {
@@ -98,15 +99,15 @@ public record class UserProfileCreateParams : ParamsBase
     /// in RFC 3339 format: for an `application` profile, when the end-user signed
     /// up; for a `passthrough` profile, when the company became the platform's customer.
     /// Must be a complete timestamp no more than 1 minute in the future. Optional.
-    /// Accepted under the `user-profiles-2026-08-18` beta header; under `user-profiles-2026-09-04`
-    /// send `external_user_details.onboarded_at` instead.
+    /// Legacy field, accepted only under the `user-profiles-2026-08-18` beta header;
+    /// without a legacy header, send `external_user_details.onboarded_at`.
     /// </summary>
-    public System::DateTimeOffset? ExternalUserOnboardedAt
+    public DateTimeOffset? ExternalUserOnboardedAt
     {
         get
         {
             this._rawBodyData.Freeze();
-            return this._rawBodyData.GetNullableStruct<System::DateTimeOffset>(
+            return this._rawBodyData.GetNullableStruct<DateTimeOffset>(
                 "external_user_onboarded_at"
             );
         }
@@ -166,8 +167,7 @@ public record class UserProfileCreateParams : ParamsBase
     }
 
     /// <summary>
-    /// This endpoint is in beta: requests must send `user-profiles-2026-03-24`, `user-profiles-2026-08-18`,
-    /// or `user-profiles-2026-09-04` in this header.
+    /// Optional header to specify the beta version(s) you want to use.
     /// </summary>
     public IReadOnlyList<ApiEnum<string, AnthropicBeta>>? Betas
     {
@@ -298,12 +298,11 @@ public record class UserProfileCreateParams : ParamsBase
             && this._rawBodyData.Equals(other._rawBodyData);
     }
 
-    public override System::Uri Url(ClientOptions options)
+    public override Uri Url(ClientOptions options)
     {
-        var queryString = this.QueryString(options);
-        return new System::UriBuilder(options.BaseUrl.ToString().TrimEnd('/') + "/v1/user_profiles")
+        return new UriBuilder(options.BaseUrl.ToString().TrimEnd('/') + "/v1/user_profiles")
         {
-            Query = string.IsNullOrEmpty(queryString) ? "beta=true" : ("beta=true&" + queryString),
+            Query = this.QueryString(options),
         }.Uri;
     }
 
@@ -358,7 +357,7 @@ sealed class AccessTypeConverter : JsonConverter<AccessType>
 {
     public override AccessType Read(
         ref Utf8JsonReader reader,
-        System::Type typeToConvert,
+        Type typeToConvert,
         JsonSerializerOptions options
     )
     {

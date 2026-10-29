@@ -332,10 +332,9 @@ public class AnthropicClientExtensionsTests : AnthropicClientExtensionsTestsBase
                 Model = "claude-haiku-4-5",
                 Messages =
                 [
-                    new MessageParam()
+                    new UserMessageParam()
                     {
-                        Role = Role.User,
-                        Content = new MessageParamContent(
+                        Content = new MessageContentParam(
                             [new TextBlockParam() { Text = "Preconfigured message" }]
                         ),
                     },
@@ -570,10 +569,9 @@ public class AnthropicClientExtensionsTests : AnthropicClientExtensionsTestsBase
                 Model = "claude-haiku-4-5",
                 Messages =
                 [
-                    new MessageParam()
+                    new UserMessageParam()
                     {
-                        Role = Role.User,
-                        Content = new MessageParamContent(
+                        Content = new MessageContentParam(
                             [new TextBlockParam() { Text = "Preconfigured message" }]
                         ),
                     },

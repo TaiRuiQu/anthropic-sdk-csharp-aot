@@ -6,7 +6,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Anthropic.Core;
 using Anthropic.Exceptions;
-using System = System;
 
 namespace Anthropic.Models.Beta.Vaults.Credentials;
 
@@ -22,9 +21,11 @@ namespace Anthropic.Models.Beta.Vaults.Credentials;
 public sealed record class BetaManagedAgentsLimitedCredentialNetworkingResponse : JsonModel
 {
     /// <summary>
-    /// Hostnames on which the secret will be substituted. An entry matches the request
-    /// host exactly; a `*.`-prefixed entry matches any subdomain of the named domain
-    /// but not the domain itself.
+    /// The destination hosts of the outbound requests that the credential's secret
+    /// is substituted into.
+    ///
+    /// <para>An entry matches the request host exactly. An entry such as `*.example.com`
+    /// matches any subdomain of `example.com` but not `example.com` itself.</para>
     /// </summary>
     public required IReadOnlyList<string> AllowedHosts
     {
@@ -42,14 +43,12 @@ public sealed record class BetaManagedAgentsLimitedCredentialNetworkingResponse 
         }
     }
 
-    public required ApiEnum<string, BetaManagedAgentsLimitedCredentialNetworkingResponseType> Type
+    public JsonElement Type
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullClass<
-                ApiEnum<string, BetaManagedAgentsLimitedCredentialNetworkingResponseType>
-            >("type");
+            return this._rawData.GetNotNullStruct<JsonElement>("type");
         }
         init { this._rawData.Set("type", value); }
     }
@@ -58,10 +57,16 @@ public sealed record class BetaManagedAgentsLimitedCredentialNetworkingResponse 
     public override void Validate()
     {
         _ = this.AllowedHosts;
-        this.Type.Validate();
+        if (!JsonElement.DeepEquals(this.Type, JsonSerializer.SerializeToElement("limited")))
+        {
+            throw new AnthropicInvalidDataException("Invalid value given for constant");
+        }
     }
 
-    public BetaManagedAgentsLimitedCredentialNetworkingResponse() { }
+    public BetaManagedAgentsLimitedCredentialNetworkingResponse()
+    {
+        this.Type = JsonSerializer.SerializeToElement("limited");
+    }
 
 #pragma warning disable CS8618
     [SetsRequiredMembers]
@@ -76,6 +81,8 @@ public sealed record class BetaManagedAgentsLimitedCredentialNetworkingResponse 
     )
     {
         this._rawData = new(rawData);
+
+        this.Type = JsonSerializer.SerializeToElement("limited");
     }
 
 #pragma warning disable CS8618
@@ -95,6 +102,13 @@ public sealed record class BetaManagedAgentsLimitedCredentialNetworkingResponse 
     {
         return new(FrozenDictionary.ToFrozenDictionary(rawData));
     }
+
+    [SetsRequiredMembers]
+    public BetaManagedAgentsLimitedCredentialNetworkingResponse(IReadOnlyList<string> allowedHosts)
+        : this()
+    {
+        this.AllowedHosts = allowedHosts;
+    }
 }
 
 class BetaManagedAgentsLimitedCredentialNetworkingResponseFromRaw
@@ -104,46 +118,4 @@ class BetaManagedAgentsLimitedCredentialNetworkingResponseFromRaw
     public BetaManagedAgentsLimitedCredentialNetworkingResponse FromRawUnchecked(
         IReadOnlyDictionary<string, JsonElement> rawData
     ) => BetaManagedAgentsLimitedCredentialNetworkingResponse.FromRawUnchecked(rawData);
-}
-
-[JsonConverter(typeof(BetaManagedAgentsLimitedCredentialNetworkingResponseTypeConverter))]
-public enum BetaManagedAgentsLimitedCredentialNetworkingResponseType
-{
-    Limited,
-}
-
-sealed class BetaManagedAgentsLimitedCredentialNetworkingResponseTypeConverter
-    : JsonConverter<BetaManagedAgentsLimitedCredentialNetworkingResponseType>
-{
-    public override BetaManagedAgentsLimitedCredentialNetworkingResponseType Read(
-        ref Utf8JsonReader reader,
-        System::Type typeToConvert,
-        JsonSerializerOptions options
-    )
-    {
-        return JsonSerializer.Deserialize<string>(ref reader, options) switch
-        {
-            "limited" => BetaManagedAgentsLimitedCredentialNetworkingResponseType.Limited,
-            _ => (BetaManagedAgentsLimitedCredentialNetworkingResponseType)(-1),
-        };
-    }
-
-    public override void Write(
-        Utf8JsonWriter writer,
-        BetaManagedAgentsLimitedCredentialNetworkingResponseType value,
-        JsonSerializerOptions options
-    )
-    {
-        JsonSerializer.Serialize(
-            writer,
-            value switch
-            {
-                BetaManagedAgentsLimitedCredentialNetworkingResponseType.Limited => "limited",
-                _ => throw new AnthropicInvalidDataException(
-                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
-                ),
-            },
-            options
-        );
-    }
 }

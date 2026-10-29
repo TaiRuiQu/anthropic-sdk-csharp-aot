@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -9,12 +10,11 @@ using System.Text.Json.Serialization;
 using Anthropic.Core;
 using Anthropic.Exceptions;
 using Anthropic.Services.Beta.Vaults;
-using System = System;
 
 namespace Anthropic.Models.Beta.Vaults.Credentials;
 
 /// <summary>
-/// Update Credential
+/// Update a Credential
 ///
 /// <para>NOTE: Do not inherit from this type outside the SDK unless you're okay with
 /// breaking changes in non-major versions. We may add new methods in the future that
@@ -33,8 +33,8 @@ public record class CredentialUpdateParams : ParamsBase
     public string? CredentialID { get; init; }
 
     /// <summary>
-    /// Updated authentication configuration. The `type` is immutable; the variant
-    /// sent must match the stored credential's type.
+    /// New authentication settings for the credential. The `type` must match the
+    /// credential's current type, which can't be changed.
     /// </summary>
     public CredentialUpdateParamsAuth? Auth
     {
@@ -238,10 +238,9 @@ public record class CredentialUpdateParams : ParamsBase
             && this._rawBodyData.Equals(other._rawBodyData);
     }
 
-    public override System::Uri Url(ClientOptions options)
+    public override Uri Url(ClientOptions options)
     {
-        var queryString = this.QueryString(options);
-        return new System::UriBuilder(
+        return new UriBuilder(
             options.BaseUrl.ToString().TrimEnd('/')
                 + string.Format(
                     "/v1/vaults/{0}/credentials/{1}",
@@ -250,7 +249,7 @@ public record class CredentialUpdateParams : ParamsBase
                 )
         )
         {
-            Query = string.IsNullOrEmpty(queryString) ? "beta=true" : ("beta=true&" + queryString),
+            Query = this.QueryString(options),
         }.Uri;
     }
 
@@ -282,8 +281,8 @@ public record class CredentialUpdateParams : ParamsBase
 }
 
 /// <summary>
-/// Updated authentication configuration. The `type` is immutable; the variant sent
-/// must match the stored credential's type.
+/// New authentication settings for the credential. The `type` must match the credential's
+/// current type, which can't be changed.
 /// </summary>
 [JsonConverter(typeof(CredentialUpdateParamsAuthConverter))]
 public record class CredentialUpdateParamsAuth : ModelBase
@@ -300,6 +299,24 @@ public record class CredentialUpdateParamsAuth : ModelBase
                 this.Value,
                 ModelBase.SerializerOptions
             );
+        }
+    }
+
+    public ApiEnum<string, CredentialUpdateParamsAuthType> Type
+    {
+        get
+        {
+            return this.Value switch
+            {
+                BetaManagedAgentsMcpOAuthUpdateParams _ => CredentialUpdateParamsAuthType.McpOAuth,
+                BetaManagedAgentsStaticBearerUpdateParams _ =>
+                    CredentialUpdateParamsAuthType.StaticBearer,
+                BetaManagedAgentsEnvironmentVariableUpdateParams _ =>
+                    CredentialUpdateParamsAuthType.EnvironmentVariable,
+                _ => WrappedJsonSerializer.GetNotNullClassProperty<
+                    ApiEnum<string, CredentialUpdateParamsAuthType>
+                >(this.Json, "type"),
+            };
         }
     }
 
@@ -426,9 +443,9 @@ public record class CredentialUpdateParamsAuth : ModelBase
     /// </example>
     /// </summary>
     public void Switch(
-        System::Action<BetaManagedAgentsMcpOAuthUpdateParams> betaManagedAgentsMcpOAuthUpdateParams,
-        System::Action<BetaManagedAgentsStaticBearerUpdateParams> betaManagedAgentsStaticBearerUpdateParams,
-        System::Action<BetaManagedAgentsEnvironmentVariableUpdateParams> betaManagedAgentsEnvironmentVariableUpdateParams
+        Action<BetaManagedAgentsMcpOAuthUpdateParams> betaManagedAgentsMcpOAuthUpdateParams,
+        Action<BetaManagedAgentsStaticBearerUpdateParams> betaManagedAgentsStaticBearerUpdateParams,
+        Action<BetaManagedAgentsEnvironmentVariableUpdateParams> betaManagedAgentsEnvironmentVariableUpdateParams
     )
     {
         switch (this.Value)
@@ -472,15 +489,12 @@ public record class CredentialUpdateParamsAuth : ModelBase
     /// </example>
     /// </summary>
     public T Match<T>(
-        System::Func<
-            BetaManagedAgentsMcpOAuthUpdateParams,
-            T
-        > betaManagedAgentsMcpOAuthUpdateParams,
-        System::Func<
+        Func<BetaManagedAgentsMcpOAuthUpdateParams, T> betaManagedAgentsMcpOAuthUpdateParams,
+        Func<
             BetaManagedAgentsStaticBearerUpdateParams,
             T
         > betaManagedAgentsStaticBearerUpdateParams,
-        System::Func<
+        Func<
             BetaManagedAgentsEnvironmentVariableUpdateParams,
             T
         > betaManagedAgentsEnvironmentVariableUpdateParams
@@ -573,7 +587,7 @@ sealed class CredentialUpdateParamsAuthConverter : JsonConverter<CredentialUpdat
 {
     public override CredentialUpdateParamsAuth? Read(
         ref Utf8JsonReader reader,
-        System::Type typeToConvert,
+        Type typeToConvert,
         JsonSerializerOptions options
     )
     {
@@ -667,5 +681,52 @@ sealed class CredentialUpdateParamsAuthConverter : JsonConverter<CredentialUpdat
     )
     {
         JsonSerializer.Serialize(writer, value.Json, options);
+    }
+}
+
+[JsonConverter(typeof(CredentialUpdateParamsAuthTypeConverter))]
+public enum CredentialUpdateParamsAuthType
+{
+    McpOAuth,
+    StaticBearer,
+    EnvironmentVariable,
+}
+
+sealed class CredentialUpdateParamsAuthTypeConverter : JsonConverter<CredentialUpdateParamsAuthType>
+{
+    public override CredentialUpdateParamsAuthType Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options
+    )
+    {
+        return JsonSerializer.Deserialize<string>(ref reader, options) switch
+        {
+            "mcp_oauth" => CredentialUpdateParamsAuthType.McpOAuth,
+            "static_bearer" => CredentialUpdateParamsAuthType.StaticBearer,
+            "environment_variable" => CredentialUpdateParamsAuthType.EnvironmentVariable,
+            _ => (CredentialUpdateParamsAuthType)(-1),
+        };
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        CredentialUpdateParamsAuthType value,
+        JsonSerializerOptions options
+    )
+    {
+        JsonSerializer.Serialize(
+            writer,
+            value switch
+            {
+                CredentialUpdateParamsAuthType.McpOAuth => "mcp_oauth",
+                CredentialUpdateParamsAuthType.StaticBearer => "static_bearer",
+                CredentialUpdateParamsAuthType.EnvironmentVariable => "environment_variable",
+                _ => throw new AnthropicInvalidDataException(
+                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
+                ),
+            },
+            options
+        );
     }
 }

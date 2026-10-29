@@ -95,11 +95,13 @@ public class BetaToolRunnerCompactionTest
     private static BetaToolRunner WeatherRunner(
         Script script,
         MessageCreateParams? parameters = null,
-        int? maxIterations = null
+        int? maxIterations = null,
+        bool thread = true
     ) =>
         script.Service.ToolRunner(
             parameters ?? BaseParams,
             [MakeWeatherToolSync(_ => "Sunny")],
+            thread,
             maxIterations
         );
 
@@ -159,7 +161,8 @@ public class BetaToolRunnerCompactionTest
                 }),
             ],
             // The compaction request is not a model turn, so both real turns still fit.
-            maxIterations: 2
+            maxIterations: 2,
+            thread: false
         );
 
         var yielded = new List<BetaMessage>();
@@ -225,10 +228,10 @@ public class BetaToolRunnerCompactionTest
     {
         var ct = TestContext.Current.CancellationToken;
         var script = new Script(CompactedResponse(), FinalTurn());
-        var runner = WeatherRunner(script);
+        var runner = WeatherRunner(script, thread: false);
 
         // An edit made before the compaction request is part of what gets summarized.
-        runner.PushMessages(new BetaMessageParam { Content = "And in NYC?", Role = Role.User });
+        runner.PushMessages(new BetaUserMessageParam { Content = "And in NYC?" });
         runner.CompactBeforeNextTurn();
         var final = await runner.RunUntilDoneAsync(ct);
 
@@ -281,7 +284,7 @@ public class BetaToolRunnerCompactionTest
             },
         };
         var script = new Script(CompactedResponse(), FinalTurn());
-        var runner = WeatherRunner(script, parameters);
+        var runner = WeatherRunner(script, parameters, thread: false);
 
         runner.CompactBeforeNextTurn();
         await runner.RunUntilDoneAsync(ct);
@@ -338,10 +341,9 @@ public class BetaToolRunnerCompactionTest
     }
 
     private static BetaMessageParam WeatherToolRemoval =>
-        new()
+        new BetaSystemMessageParam
         {
-            Role = Role.System,
-            Content = new BetaMessageParamContent(
+            Content = new BetaSystemMessageParamContent(
                 [new BetaRequestToolRemovalBlock(new BetaToolChangeToolReference("get_weather"))]
             ),
         };
@@ -416,7 +418,7 @@ public class BetaToolRunnerCompactionTest
     {
         var ct = TestContext.Current.CancellationToken;
         var script = new Script(MakePausedTurn(), ToolUseTurn(), CompactedResponse(), FinalTurn());
-        var runner = WeatherRunner(script);
+        var runner = WeatherRunner(script, thread: false);
 
         await foreach (var message in runner.WithCancellation(ct))
         {
@@ -523,7 +525,7 @@ public class BetaToolRunnerCompactionTest
         var ct = TestContext.Current.CancellationToken;
         var content = JsonSerializer.Deserialize<List<BetaContentBlock>>(contentJson)!;
         var script = new Script(ToolUseTurn(), MakeMessage(content, stopReason), FinalTurn());
-        var runner = WeatherRunner(script);
+        var runner = WeatherRunner(script, thread: false);
 
         var yielded = 0;
         var stderr = await FallbackTestSupport.CaptureStderr(async () =>
@@ -593,9 +595,7 @@ public class BetaToolRunnerCompactionTest
             else if (message.StopReason == BetaStopReason.Compaction)
             {
                 var fromPush = Assert.Throws<AnthropicException>(() =>
-                    runner.PushMessages(
-                        new BetaMessageParam { Content = "And in NYC?", Role = Role.User }
-                    )
+                    runner.PushMessages(new BetaUserMessageParam { Content = "And in NYC?" })
                 );
                 var fromSet = Assert.Throws<AnthropicException>(() =>
                     runner.SetParams(p => p with { Messages = [] })
@@ -626,7 +626,7 @@ public class BetaToolRunnerCompactionTest
         await Assert.ThrowsAsync<AnthropicIOException>(() => runner.RunUntilDoneAsync(ct));
 
         // Nothing is compacting any more, so the messages can change again.
-        runner.PushMessages(new BetaMessageParam { Content = "And in NYC?", Role = Role.User });
+        runner.PushMessages(new BetaUserMessageParam { Content = "And in NYC?" });
         mock.Verify(
             s => s.Create(It.IsAny<MessageCreateParams>(), It.IsAny<CancellationToken>()),
             Times.Once

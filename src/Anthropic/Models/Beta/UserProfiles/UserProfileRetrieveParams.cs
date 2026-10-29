@@ -22,8 +22,7 @@ public record class UserProfileRetrieveParams : ParamsBase
     public string? UserProfileID { get; init; }
 
     /// <summary>
-    /// This endpoint is in beta: requests must send `user-profiles-2026-03-24`, `user-profiles-2026-08-18`,
-    /// or `user-profiles-2026-09-04` in this header.
+    /// Optional header to specify the beta version(s) you want to use.
     /// </summary>
     public IReadOnlyList<ApiEnum<string, AnthropicBeta>>? Betas
     {
@@ -154,7 +153,6 @@ public record class UserProfileRetrieveParams : ParamsBase
 
     public override Uri Url(ClientOptions options)
     {
-        var queryString = this.QueryString(options);
         return new UriBuilder(
             options.BaseUrl.ToString().TrimEnd('/')
                 + string.Format(
@@ -163,7 +161,7 @@ public record class UserProfileRetrieveParams : ParamsBase
                 )
         )
         {
-            Query = string.IsNullOrEmpty(queryString) ? "beta=true" : ("beta=true&" + queryString),
+            Query = this.QueryString(options),
         }.Uri;
     }
 

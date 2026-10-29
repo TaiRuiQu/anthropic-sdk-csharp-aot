@@ -12,7 +12,7 @@ using Anthropic.Services.Beta;
 namespace Anthropic.Models.Beta.Vaults;
 
 /// <summary>
-/// Update Vault
+/// Update a Vault
 ///
 /// <para>NOTE: Do not inherit from this type outside the SDK unless you're okay with
 /// breaking changes in non-major versions. We may add new methods in the future that
@@ -206,7 +206,6 @@ public record class VaultUpdateParams : ParamsBase
 
     public override Uri Url(ClientOptions options)
     {
-        var queryString = this.QueryString(options);
         return new UriBuilder(
             options.BaseUrl.ToString().TrimEnd('/')
                 + string.Format(
@@ -215,7 +214,7 @@ public record class VaultUpdateParams : ParamsBase
                 )
         )
         {
-            Query = string.IsNullOrEmpty(queryString) ? "beta=true" : ("beta=true&" + queryString),
+            Query = this.QueryString(options),
         }.Uri;
     }
 

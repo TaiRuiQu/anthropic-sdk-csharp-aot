@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
 
     <PackageId>TairuiQu.Anthropic.GoogleCloud</PackageId>
-    <VersionPrefix>0.2.0-aot.1</VersionPrefix>
+    <VersionPrefix>1.0.1-aot.1</VersionPrefix>
     <Description>Unofficial Native AOT-enabled fork of the Anthropic Google Cloud client. Not affiliated with or endorsed by Anthropic.</Description>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
   </PropertyGroup>

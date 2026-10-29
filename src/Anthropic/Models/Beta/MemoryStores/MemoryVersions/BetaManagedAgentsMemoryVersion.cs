@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -5,18 +6,23 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Anthropic.Core;
 using Anthropic.Exceptions;
-using System = System;
 
 namespace Anthropic.Models.Beta.MemoryStores.MemoryVersions;
 
 /// <summary>
-/// A `memory_version` object: one immutable, attributed row in a memory's append-only
-/// history. Every non-no-op mutation to a memory produces a new version. Versions
-/// belong to the store (not the individual memory) and are not deleted with the memory;
-/// each version is retained for at least the version retention period after it was
-/// written, unless the store itself is deleted. Retrieving a redacted version returns
-/// 200 with `content`, `path`, `content_size_bytes`, and `content_sha256` set to
-/// `null`; branch on `redacted_at`, not HTTP status.
+/// One entry in a memory's history, recording a single change and who made it.
+///
+/// <para>Every change to a memory adds one version. Only redaction can change a version
+/// after that. Versions belong to the memory store and stay after the memory is
+/// deleted. Each version is retained for at least the version retention period after
+/// it was written, unless the store itself is deleted.</para>
+///
+/// <para>Retrieving a redacted version succeeds, with `content`, `path`, `content_size_bytes`,
+/// and `content_sha256` set to `null`. Check `redacted_at` to find out whether a
+/// version was redacted.</para>
+///
+/// <para>See the [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#audit-memory-changes)
+/// to learn more about memory versions.</para>
 /// </summary>
 [JsonConverter(
     typeof(JsonModelConverter<
@@ -42,21 +48,23 @@ public sealed record class BetaManagedAgentsMemoryVersion : JsonModel
     /// <summary>
     /// When this version was written, in RFC 3339 format.
     /// </summary>
-    public required System::DateTimeOffset CreatedAt
+    public required DateTimeOffset CreatedAt
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullStruct<System::DateTimeOffset>("created_at");
+            return this._rawData.GetNotNullStruct<DateTimeOffset>("created_at");
         }
         init { this._rawData.Set("created_at", value); }
     }
 
     /// <summary>
-    /// ID of the memory this version snapshots (a `mem_...` value). Remains valid
-    /// after the memory is deleted; pass it as `memory_id` to [List memory versions](/en/api/beta/memory_stores/memory_versions/list)
-    /// to retrieve the memory's retained versions, including the `deleted` row while
-    /// the lineage is retained.
+    /// The ID of the memory that this version belongs to (`mem_...`).
+    ///
+    /// <para>The ID stays valid after the memory is deleted. Pass it as `memory_id`
+    /// to [List Memory Versions](https://platform.claude.com/docs/en/api/beta/memory_stores/memory_versions/list)
+    /// to get the memory's retained versions, including its `deleted` version while
+    /// the lineage is retained.</para>
     /// </summary>
     public required string MemoryID
     {
@@ -96,14 +104,12 @@ public sealed record class BetaManagedAgentsMemoryVersion : JsonModel
         init { this._rawData.Set("operation", value); }
     }
 
-    public required ApiEnum<string, BetaManagedAgentsMemoryVersionType> Type
+    public JsonElement Type
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullClass<
-                ApiEnum<string, BetaManagedAgentsMemoryVersionType>
-            >("type");
+            return this._rawData.GetNotNullStruct<JsonElement>("type");
         }
         init { this._rawData.Set("type", value); }
     }
@@ -152,13 +158,16 @@ public sealed record class BetaManagedAgentsMemoryVersion : JsonModel
     }
 
     /// <summary>
-    /// Who performed this write: one of `session_actor`, `api_actor`, `user_actor`,
-    /// or `service_account_actor`; `null` when no writer is recorded. Captured at
-    /// write time and preserved through redaction. A `session_actor` is an agent
-    /// writing through the store's mounted filesystem at `/mnt/memory/`. The API
-    /// key that created that session is not recorded on agent writes, so attribution
-    /// names who made the write, not who is ultimately responsible; look up session
-    /// provenance via the [Sessions API](/en/api/beta/sessions/retrieve).
+    /// Who made this change to the memory, or `null` if the author wasn't recorded.
+    ///
+    /// <para>Redacting the version doesn't change this field. A `session_actor` here
+    /// is an agent that wrote through the store's mounted filesystem at `/mnt/memory/`.
+    /// The version doesn't record the API key that created that session. So the author
+    /// in `created_by` is who made the change, not who is ultimately responsible
+    /// for it.</para>
+    ///
+    /// <para>You can [retrieve the session](https://platform.claude.com/docs/en/api/beta/sessions/retrieve)
+    /// to learn more about where the change came from.</para>
     /// </summary>
     public BetaManagedAgentsActor? CreatedBy
     {
@@ -194,16 +203,20 @@ public sealed record class BetaManagedAgentsMemoryVersion : JsonModel
     }
 
     /// <summary>
-    /// When this version was redacted, in RFC 3339 format, or `null` if it has not
-    /// been redacted. When set, `content`, `path`, `content_size_bytes`, and `content_sha256`
-    /// are all `null`. See [Redact a memory version](/en/api/beta/memory_stores/memory_versions/redact).
+    /// When the version was redacted, in RFC 3339, or `null` if it hasn't been.
+    ///
+    /// <para>When set, `content`, `path`, `content_size_bytes`, and `content_sha256`
+    /// are `null`.</para>
+    ///
+    /// <para>See the [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#redact-a-version)
+    /// to learn more about redaction.</para>
     /// </summary>
-    public System::DateTimeOffset? RedactedAt
+    public DateTimeOffset? RedactedAt
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNullableStruct<System::DateTimeOffset>("redacted_at");
+            return this._rawData.GetNullableStruct<DateTimeOffset>("redacted_at");
         }
         init { this._rawData.Set("redacted_at", value); }
     }
@@ -240,7 +253,10 @@ public sealed record class BetaManagedAgentsMemoryVersion : JsonModel
         _ = this.MemoryID;
         _ = this.MemoryStoreID;
         this.Operation.Validate();
-        this.Type.Validate();
+        if (!JsonElement.DeepEquals(this.Type, JsonSerializer.SerializeToElement("memory_version")))
+        {
+            throw new AnthropicInvalidDataException("Invalid value given for constant");
+        }
         _ = this.Content;
         _ = this.ContentSha256;
         _ = this.ContentSizeBytes;
@@ -250,7 +266,10 @@ public sealed record class BetaManagedAgentsMemoryVersion : JsonModel
         this.RedactedBy?.Validate();
     }
 
-    public BetaManagedAgentsMemoryVersion() { }
+    public BetaManagedAgentsMemoryVersion()
+    {
+        this.Type = JsonSerializer.SerializeToElement("memory_version");
+    }
 
 #pragma warning disable CS8618
     [SetsRequiredMembers]
@@ -263,6 +282,8 @@ public sealed record class BetaManagedAgentsMemoryVersion : JsonModel
     public BetaManagedAgentsMemoryVersion(IReadOnlyDictionary<string, JsonElement> rawData)
     {
         this._rawData = new(rawData);
+
+        this.Type = JsonSerializer.SerializeToElement("memory_version");
     }
 
 #pragma warning disable CS8618
@@ -288,46 +309,4 @@ class BetaManagedAgentsMemoryVersionFromRaw : IFromRawJson<BetaManagedAgentsMemo
     public BetaManagedAgentsMemoryVersion FromRawUnchecked(
         IReadOnlyDictionary<string, JsonElement> rawData
     ) => BetaManagedAgentsMemoryVersion.FromRawUnchecked(rawData);
-}
-
-[JsonConverter(typeof(BetaManagedAgentsMemoryVersionTypeConverter))]
-public enum BetaManagedAgentsMemoryVersionType
-{
-    MemoryVersion,
-}
-
-sealed class BetaManagedAgentsMemoryVersionTypeConverter
-    : JsonConverter<BetaManagedAgentsMemoryVersionType>
-{
-    public override BetaManagedAgentsMemoryVersionType Read(
-        ref Utf8JsonReader reader,
-        System::Type typeToConvert,
-        JsonSerializerOptions options
-    )
-    {
-        return JsonSerializer.Deserialize<string>(ref reader, options) switch
-        {
-            "memory_version" => BetaManagedAgentsMemoryVersionType.MemoryVersion,
-            _ => (BetaManagedAgentsMemoryVersionType)(-1),
-        };
-    }
-
-    public override void Write(
-        Utf8JsonWriter writer,
-        BetaManagedAgentsMemoryVersionType value,
-        JsonSerializerOptions options
-    )
-    {
-        JsonSerializer.Serialize(
-            writer,
-            value switch
-            {
-                BetaManagedAgentsMemoryVersionType.MemoryVersion => "memory_version",
-                _ => throw new AnthropicInvalidDataException(
-                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
-                ),
-            },
-            options
-        );
-    }
 }

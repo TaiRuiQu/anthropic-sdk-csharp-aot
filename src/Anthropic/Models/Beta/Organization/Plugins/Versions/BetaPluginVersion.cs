@@ -113,7 +113,13 @@ public sealed record class BetaPluginVersion : JsonModel
     }
 
     /// <summary>
-    /// The version string the manifest declares; null when it declares none.
+    /// The manifest's `version`, normalized for display: one leading `v` or `V` is
+    /// dropped, and the result is returned only if it is 1 to 64 characters, starts
+    /// with a digit, and uses only ASCII letters, digits, `.`, `+`, and `-`; otherwise
+    /// `null`. For example, `"v1.4.0"` is returned as `"1.4.0"`, and `"latest"` as
+    /// `null`. For a synchronized plugin, the `version` of its `marketplace.json`
+    /// entry can take the place of the manifest's `version`. It is also `null` for
+    /// a version stored before claude.ai began recording this field (August 2026).
     /// </summary>
     public required string? ManifestVersion
     {
@@ -139,8 +145,8 @@ public sealed record class BetaPluginVersion : JsonModel
     }
 
     /// <summary>
-    /// How far the version reaches: `remote`, `privileged` or `contained`, as on
-    /// the Plugin; null when not classifiable.
+    /// How far the version reaches: `remote`, `privileged`, `contained`, or `null`,
+    /// as defined on the Plugin's `reach`.
     /// </summary>
     public required ApiEnum<string, Reach>? Reach
     {
@@ -264,15 +270,18 @@ public record class CreatedBy : ModelBase
         }
     }
 
-    public JsonElement Type
+    public ApiEnum<string, CreatedByType> Type
     {
         get
         {
             return this.Value switch
             {
-                BetaPluginUserActor x => x.Type,
-                BetaPluginApiActor x => x.Type,
-                _ => WrappedJsonSerializer.GetNotNullStructProperty<JsonElement>(this.Json, "type"),
+                BetaPluginUserActor _ => CreatedByType.UserActor,
+                BetaPluginApiActor _ => CreatedByType.ApiActor,
+                _ => WrappedJsonSerializer.GetNotNullClassProperty<ApiEnum<string, CreatedByType>>(
+                    this.Json,
+                    "type"
+                ),
             };
         }
     }
@@ -543,9 +552,53 @@ sealed class CreatedByConverter : JsonConverter<CreatedBy?>
     }
 }
 
+[JsonConverter(typeof(CreatedByTypeConverter))]
+public enum CreatedByType
+{
+    UserActor,
+    ApiActor,
+}
+
+sealed class CreatedByTypeConverter : JsonConverter<CreatedByType>
+{
+    public override CreatedByType Read(
+        ref Utf8JsonReader reader,
+        System::Type typeToConvert,
+        JsonSerializerOptions options
+    )
+    {
+        return JsonSerializer.Deserialize<string>(ref reader, options) switch
+        {
+            "user_actor" => CreatedByType.UserActor,
+            "api_actor" => CreatedByType.ApiActor,
+            _ => (CreatedByType)(-1),
+        };
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        CreatedByType value,
+        JsonSerializerOptions options
+    )
+    {
+        JsonSerializer.Serialize(
+            writer,
+            value switch
+            {
+                CreatedByType.UserActor => "user_actor",
+                CreatedByType.ApiActor => "api_actor",
+                _ => throw new AnthropicInvalidDataException(
+                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
+                ),
+            },
+            options
+        );
+    }
+}
+
 /// <summary>
-/// How far the version reaches: `remote`, `privileged` or `contained`, as on the
-/// Plugin; null when not classifiable.
+/// How far the version reaches: `remote`, `privileged`, `contained`, or `null`,
+/// as defined on the Plugin's `reach`.
 /// </summary>
 [JsonConverter(typeof(ReachConverter))]
 public enum Reach

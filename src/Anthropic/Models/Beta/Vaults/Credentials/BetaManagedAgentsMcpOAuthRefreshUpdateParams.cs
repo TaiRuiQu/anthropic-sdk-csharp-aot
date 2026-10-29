@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -5,7 +6,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Anthropic.Core;
 using Anthropic.Exceptions;
-using System = System;
 
 namespace Anthropic.Models.Beta.Vaults.Credentials;
 
@@ -21,7 +21,7 @@ namespace Anthropic.Models.Beta.Vaults.Credentials;
 public sealed record class BetaManagedAgentsMcpOAuthRefreshUpdateParams : JsonModel
 {
     /// <summary>
-    /// Updated OAuth refresh token.
+    /// The new OAuth refresh token to replace the stored one.
     /// </summary>
     public string? RefreshToken
     {
@@ -34,7 +34,8 @@ public sealed record class BetaManagedAgentsMcpOAuthRefreshUpdateParams : JsonMo
     }
 
     /// <summary>
-    /// Updated OAuth scope for the refresh request.
+    /// The new OAuth scope for refresh requests. Send an empty string to clear the
+    /// stored scope.
     /// </summary>
     public string? Scope
     {
@@ -133,6 +134,26 @@ public record class BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAut
                 this.Value,
                 ModelBase.SerializerOptions
             );
+        }
+    }
+
+    public ApiEnum<string, BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthType> Type
+    {
+        get
+        {
+            return this.Value switch
+            {
+                BetaManagedAgentsTokenEndpointAuthBasicUpdateParam _ =>
+                    BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthType.ClientSecretBasic,
+                BetaManagedAgentsTokenEndpointAuthPostUpdateParam _ =>
+                    BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthType.ClientSecretPost,
+                _ => WrappedJsonSerializer.GetNotNullClassProperty<
+                    ApiEnum<
+                        string,
+                        BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthType
+                    >
+                >(this.Json, "type"),
+            };
         }
     }
 
@@ -242,8 +263,8 @@ public record class BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAut
     /// </example>
     /// </summary>
     public void Switch(
-        System::Action<BetaManagedAgentsTokenEndpointAuthBasicUpdateParam> betaManagedAgentsTokenEndpointAuthBasicUpdateParam,
-        System::Action<BetaManagedAgentsTokenEndpointAuthPostUpdateParam> betaManagedAgentsTokenEndpointAuthPostUpdateParam
+        Action<BetaManagedAgentsTokenEndpointAuthBasicUpdateParam> betaManagedAgentsTokenEndpointAuthBasicUpdateParam,
+        Action<BetaManagedAgentsTokenEndpointAuthPostUpdateParam> betaManagedAgentsTokenEndpointAuthPostUpdateParam
     )
     {
         switch (this.Value)
@@ -283,11 +304,11 @@ public record class BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAut
     /// </example>
     /// </summary>
     public T Match<T>(
-        System::Func<
+        Func<
             BetaManagedAgentsTokenEndpointAuthBasicUpdateParam,
             T
         > betaManagedAgentsTokenEndpointAuthBasicUpdateParam,
-        System::Func<
+        Func<
             BetaManagedAgentsTokenEndpointAuthPostUpdateParam,
             T
         > betaManagedAgentsTokenEndpointAuthPostUpdateParam
@@ -373,7 +394,7 @@ sealed class BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthConver
 {
     public override BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuth? Read(
         ref Utf8JsonReader reader,
-        System::Type typeToConvert,
+        Type typeToConvert,
         JsonSerializerOptions options
     )
     {
@@ -446,5 +467,54 @@ sealed class BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthConver
     )
     {
         JsonSerializer.Serialize(writer, value.Json, options);
+    }
+}
+
+[JsonConverter(typeof(BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthTypeConverter))]
+public enum BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthType
+{
+    ClientSecretBasic,
+    ClientSecretPost,
+}
+
+sealed class BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthTypeConverter
+    : JsonConverter<BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthType>
+{
+    public override BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthType Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options
+    )
+    {
+        return JsonSerializer.Deserialize<string>(ref reader, options) switch
+        {
+            "client_secret_basic" =>
+                BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthType.ClientSecretBasic,
+            "client_secret_post" =>
+                BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthType.ClientSecretPost,
+            _ => (BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthType)(-1),
+        };
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthType value,
+        JsonSerializerOptions options
+    )
+    {
+        JsonSerializer.Serialize(
+            writer,
+            value switch
+            {
+                BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthType.ClientSecretBasic =>
+                    "client_secret_basic",
+                BetaManagedAgentsMcpOAuthRefreshUpdateParamsTokenEndpointAuthType.ClientSecretPost =>
+                    "client_secret_post",
+                _ => throw new AnthropicInvalidDataException(
+                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
+                ),
+            },
+            options
+        );
     }
 }

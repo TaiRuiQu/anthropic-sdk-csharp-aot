@@ -5,16 +5,15 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Anthropic.Core;
 using Anthropic.Exceptions;
-using System = System;
 
 namespace Anthropic.Models.Beta.MemoryStores.Memories;
 
 /// <summary>
-/// A rolled-up directory marker returned by [List memories](/en/api/beta/memory_stores/memories/list)
-/// when `depth` is set. Indicates that one or more memories exist deeper than the
-/// requested depth under this prefix. This is a list-time rollup, not a stored resource;
-/// it has no ID and no lifecycle. Each prefix counts toward the page `limit` and
-/// interleaves with `memory` items in path order.
+/// A directory marker that [List Memories](https://platform.claude.com/docs/en/api/beta/memory_stores/memories/list)
+/// returns instead of the memories below the requested `depth`.
+///
+/// <para>It stands for one or more memories whose paths start with `path`. It isn't
+/// a stored object and doesn't have an ID. Each marker counts toward the page `limit`.</para>
 /// </summary>
 [JsonConverter(
     typeof(JsonModelConverter<BetaManagedAgentsMemoryPrefix, BetaManagedAgentsMemoryPrefixFromRaw>)
@@ -35,14 +34,12 @@ public sealed record class BetaManagedAgentsMemoryPrefix : JsonModel
         init { this._rawData.Set("path", value); }
     }
 
-    public required ApiEnum<string, BetaManagedAgentsMemoryPrefixType> Type
+    public JsonElement Type
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullClass<
-                ApiEnum<string, BetaManagedAgentsMemoryPrefixType>
-            >("type");
+            return this._rawData.GetNotNullStruct<JsonElement>("type");
         }
         init { this._rawData.Set("type", value); }
     }
@@ -51,10 +48,16 @@ public sealed record class BetaManagedAgentsMemoryPrefix : JsonModel
     public override void Validate()
     {
         _ = this.Path;
-        this.Type.Validate();
+        if (!JsonElement.DeepEquals(this.Type, JsonSerializer.SerializeToElement("memory_prefix")))
+        {
+            throw new AnthropicInvalidDataException("Invalid value given for constant");
+        }
     }
 
-    public BetaManagedAgentsMemoryPrefix() { }
+    public BetaManagedAgentsMemoryPrefix()
+    {
+        this.Type = JsonSerializer.SerializeToElement("memory_prefix");
+    }
 
 #pragma warning disable CS8618
     [SetsRequiredMembers]
@@ -67,6 +70,8 @@ public sealed record class BetaManagedAgentsMemoryPrefix : JsonModel
     public BetaManagedAgentsMemoryPrefix(IReadOnlyDictionary<string, JsonElement> rawData)
     {
         this._rawData = new(rawData);
+
+        this.Type = JsonSerializer.SerializeToElement("memory_prefix");
     }
 
 #pragma warning disable CS8618
@@ -84,6 +89,13 @@ public sealed record class BetaManagedAgentsMemoryPrefix : JsonModel
     {
         return new(FrozenDictionary.ToFrozenDictionary(rawData));
     }
+
+    [SetsRequiredMembers]
+    public BetaManagedAgentsMemoryPrefix(string path)
+        : this()
+    {
+        this.Path = path;
+    }
 }
 
 class BetaManagedAgentsMemoryPrefixFromRaw : IFromRawJson<BetaManagedAgentsMemoryPrefix>
@@ -92,46 +104,4 @@ class BetaManagedAgentsMemoryPrefixFromRaw : IFromRawJson<BetaManagedAgentsMemor
     public BetaManagedAgentsMemoryPrefix FromRawUnchecked(
         IReadOnlyDictionary<string, JsonElement> rawData
     ) => BetaManagedAgentsMemoryPrefix.FromRawUnchecked(rawData);
-}
-
-[JsonConverter(typeof(BetaManagedAgentsMemoryPrefixTypeConverter))]
-public enum BetaManagedAgentsMemoryPrefixType
-{
-    MemoryPrefix,
-}
-
-sealed class BetaManagedAgentsMemoryPrefixTypeConverter
-    : JsonConverter<BetaManagedAgentsMemoryPrefixType>
-{
-    public override BetaManagedAgentsMemoryPrefixType Read(
-        ref Utf8JsonReader reader,
-        System::Type typeToConvert,
-        JsonSerializerOptions options
-    )
-    {
-        return JsonSerializer.Deserialize<string>(ref reader, options) switch
-        {
-            "memory_prefix" => BetaManagedAgentsMemoryPrefixType.MemoryPrefix,
-            _ => (BetaManagedAgentsMemoryPrefixType)(-1),
-        };
-    }
-
-    public override void Write(
-        Utf8JsonWriter writer,
-        BetaManagedAgentsMemoryPrefixType value,
-        JsonSerializerOptions options
-    )
-    {
-        JsonSerializer.Serialize(
-            writer,
-            value switch
-            {
-                BetaManagedAgentsMemoryPrefixType.MemoryPrefix => "memory_prefix",
-                _ => throw new AnthropicInvalidDataException(
-                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
-                ),
-            },
-            options
-        );
-    }
 }

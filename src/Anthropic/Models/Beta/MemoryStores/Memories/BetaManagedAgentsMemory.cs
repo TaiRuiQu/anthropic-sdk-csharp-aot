@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -5,23 +6,28 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Anthropic.Core;
 using Anthropic.Exceptions;
-using System = System;
 
 namespace Anthropic.Models.Beta.MemoryStores.Memories;
 
 /// <summary>
-/// A `memory` object: a single text document at a hierarchical path inside a memory
-/// store. The `content` field is populated when `view=full` and `null` when `view=basic`;
-/// the `content_size_bytes` and `content_sha256` fields are always populated so sync
-/// clients can diff without fetching content. Memories are addressed by their `mem_...`
-/// ID; the path is the create key and can be changed via update.
+/// A text document at a path inside a memory store.
+///
+/// <para>`content` is `null` when the response uses `view=basic`. `content_size_bytes`
+/// and `content_sha256` are always set, so you can detect changes without fetching
+/// the content. To retrieve, update, or delete a memory, pass its ID, which stays
+/// the same when its path changes.</para>
+///
+/// <para>See the [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#view-and-edit-memories)
+/// to learn more about working with memories.</para>
 /// </summary>
 [JsonConverter(typeof(JsonModelConverter<BetaManagedAgentsMemory, BetaManagedAgentsMemoryFromRaw>))]
 public sealed record class BetaManagedAgentsMemory : JsonModel
 {
     /// <summary>
-    /// Unique identifier for this memory (a `mem_...` value). Stable across renames;
-    /// use this ID, not the path, to read, update, or delete the memory.
+    /// The unique ID of the memory (`mem_...`). It stays the same when the memory's
+    /// path changes.
+    ///
+    /// <para>To retrieve, update, or delete the memory, pass this ID.</para>
     /// </summary>
     public required string ID
     {
@@ -50,8 +56,7 @@ public sealed record class BetaManagedAgentsMemory : JsonModel
     }
 
     /// <summary>
-    /// Size of `content` in bytes (the UTF-8 plaintext length). Always populated,
-    /// regardless of `view`.
+    /// The size of the memory's `content` in UTF-8 bytes. It is set regardless of `view`.
     /// </summary>
     public required int ContentSizeBytes
     {
@@ -66,12 +71,12 @@ public sealed record class BetaManagedAgentsMemory : JsonModel
     /// <summary>
     /// When this memory was created, in RFC 3339 format.
     /// </summary>
-    public required System::DateTimeOffset CreatedAt
+    public required DateTimeOffset CreatedAt
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullStruct<System::DateTimeOffset>("created_at");
+            return this._rawData.GetNotNullStruct<DateTimeOffset>("created_at");
         }
         init { this._rawData.Set("created_at", value); }
     }
@@ -90,10 +95,13 @@ public sealed record class BetaManagedAgentsMemory : JsonModel
     }
 
     /// <summary>
-    /// ID of the `memory_version` representing this memory's current content (a
-    /// `memver_...` value). This is the authoritative head pointer; `memory_version`
-    /// objects do not carry an `is_latest` flag, so compare against this field instead.
-    /// Enumerate the history via [List memory versions](/en/api/beta/memory_stores/memory_versions/list).
+    /// The ID of the memory version that holds the memory's current content (`memver_...`).
+    ///
+    /// <para>Memory versions don't have a flag that marks the latest one. Compare
+    /// their IDs with this field instead.</para>
+    ///
+    /// <para>See the [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#audit-memory-changes)
+    /// to learn more about memory versions.</para>
     /// </summary>
     public required string MemoryVersionID
     {
@@ -120,36 +128,36 @@ public sealed record class BetaManagedAgentsMemory : JsonModel
         init { this._rawData.Set("path", value); }
     }
 
-    public required ApiEnum<string, BetaManagedAgentsMemoryType> Type
+    public JsonElement Type
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullClass<ApiEnum<string, BetaManagedAgentsMemoryType>>(
-                "type"
-            );
+            return this._rawData.GetNotNullStruct<JsonElement>("type");
         }
         init { this._rawData.Set("type", value); }
     }
 
     /// <summary>
-    /// When this memory was last modified, in RFC 3339 format. Use this as a cheap
-    /// freshness signal; for who made the change, look up the head version's `created_by`
-    /// via [List memory versions](/en/api/beta/memory_stores/memory_versions/list).
+    /// When the memory was last changed, in RFC 3339.
+    ///
+    /// <para>To find out who made the change, look at `created_by` on the memory
+    /// version that `memory_version_id` references.</para>
     /// </summary>
-    public required System::DateTimeOffset UpdatedAt
+    public required DateTimeOffset UpdatedAt
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullStruct<System::DateTimeOffset>("updated_at");
+            return this._rawData.GetNotNullStruct<DateTimeOffset>("updated_at");
         }
         init { this._rawData.Set("updated_at", value); }
     }
 
     /// <summary>
-    /// The memory's UTF-8 text content. Populated when `view=full`; `null` when
-    /// `view=basic`. Maximum 100 kB (102,400 bytes).
+    /// The memory's UTF-8 text content, or `null` when the response uses `view=basic`.
+    ///
+    /// <para>The maximum size is 100 kB (102,400 bytes).</para>
     /// </summary>
     public string? Content
     {
@@ -171,12 +179,18 @@ public sealed record class BetaManagedAgentsMemory : JsonModel
         _ = this.MemoryStoreID;
         _ = this.MemoryVersionID;
         _ = this.Path;
-        this.Type.Validate();
+        if (!JsonElement.DeepEquals(this.Type, JsonSerializer.SerializeToElement("memory")))
+        {
+            throw new AnthropicInvalidDataException("Invalid value given for constant");
+        }
         _ = this.UpdatedAt;
         _ = this.Content;
     }
 
-    public BetaManagedAgentsMemory() { }
+    public BetaManagedAgentsMemory()
+    {
+        this.Type = JsonSerializer.SerializeToElement("memory");
+    }
 
 #pragma warning disable CS8618
     [SetsRequiredMembers]
@@ -187,6 +201,8 @@ public sealed record class BetaManagedAgentsMemory : JsonModel
     public BetaManagedAgentsMemory(IReadOnlyDictionary<string, JsonElement> rawData)
     {
         this._rawData = new(rawData);
+
+        this.Type = JsonSerializer.SerializeToElement("memory");
     }
 
 #pragma warning disable CS8618
@@ -212,45 +228,4 @@ class BetaManagedAgentsMemoryFromRaw : IFromRawJson<BetaManagedAgentsMemory>
     public BetaManagedAgentsMemory FromRawUnchecked(
         IReadOnlyDictionary<string, JsonElement> rawData
     ) => BetaManagedAgentsMemory.FromRawUnchecked(rawData);
-}
-
-[JsonConverter(typeof(BetaManagedAgentsMemoryTypeConverter))]
-public enum BetaManagedAgentsMemoryType
-{
-    Memory,
-}
-
-sealed class BetaManagedAgentsMemoryTypeConverter : JsonConverter<BetaManagedAgentsMemoryType>
-{
-    public override BetaManagedAgentsMemoryType Read(
-        ref Utf8JsonReader reader,
-        System::Type typeToConvert,
-        JsonSerializerOptions options
-    )
-    {
-        return JsonSerializer.Deserialize<string>(ref reader, options) switch
-        {
-            "memory" => BetaManagedAgentsMemoryType.Memory,
-            _ => (BetaManagedAgentsMemoryType)(-1),
-        };
-    }
-
-    public override void Write(
-        Utf8JsonWriter writer,
-        BetaManagedAgentsMemoryType value,
-        JsonSerializerOptions options
-    )
-    {
-        JsonSerializer.Serialize(
-            writer,
-            value switch
-            {
-                BetaManagedAgentsMemoryType.Memory => "memory",
-                _ => throw new AnthropicInvalidDataException(
-                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
-                ),
-            },
-            options
-        );
-    }
 }

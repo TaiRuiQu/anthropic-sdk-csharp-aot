@@ -195,12 +195,11 @@ public record class SpendLimitSetParams : ParamsBase
 
     public override Uri Url(ClientOptions options)
     {
-        var queryString = this.QueryString(options);
         return new UriBuilder(
             options.BaseUrl.ToString().TrimEnd('/') + "/v1/organizations/spend_limits"
         )
         {
-            Query = string.IsNullOrEmpty(queryString) ? "beta=true" : ("beta=true&" + queryString),
+            Query = this.QueryString(options),
         }.Uri;
     }
 
@@ -255,16 +254,19 @@ public record class Scope : ModelBase
         }
     }
 
-    public JsonElement Type
+    public ApiEnum<string, ScopeTypeValue> Type
     {
         get
         {
             return this.Value switch
             {
-                BetaSpendLimitUserScope x => x.Type,
-                BetaSpendLimitOrganizationScope x => x.Type,
-                BetaSpendLimitWorkspaceScope x => x.Type,
-                _ => WrappedJsonSerializer.GetNotNullStructProperty<JsonElement>(this.Json, "type"),
+                BetaSpendLimitUserScope _ => ScopeTypeValue.User,
+                BetaSpendLimitOrganizationScope _ => ScopeTypeValue.Organization,
+                BetaSpendLimitWorkspaceScope _ => ScopeTypeValue.Workspace,
+                _ => WrappedJsonSerializer.GetNotNullClassProperty<ApiEnum<string, ScopeTypeValue>>(
+                    this.Json,
+                    "type"
+                ),
             };
         }
     }
@@ -587,5 +589,52 @@ sealed class ScopeConverter : JsonConverter<Scope>
     public override void Write(Utf8JsonWriter writer, Scope value, JsonSerializerOptions options)
     {
         JsonSerializer.Serialize(writer, value.Json, options);
+    }
+}
+
+[JsonConverter(typeof(ScopeTypeValueConverter))]
+public enum ScopeTypeValue
+{
+    User,
+    Organization,
+    Workspace,
+}
+
+sealed class ScopeTypeValueConverter : JsonConverter<ScopeTypeValue>
+{
+    public override ScopeTypeValue Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options
+    )
+    {
+        return JsonSerializer.Deserialize<string>(ref reader, options) switch
+        {
+            "user" => ScopeTypeValue.User,
+            "organization" => ScopeTypeValue.Organization,
+            "workspace" => ScopeTypeValue.Workspace,
+            _ => (ScopeTypeValue)(-1),
+        };
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        ScopeTypeValue value,
+        JsonSerializerOptions options
+    )
+    {
+        JsonSerializer.Serialize(
+            writer,
+            value switch
+            {
+                ScopeTypeValue.User => "user",
+                ScopeTypeValue.Organization => "organization",
+                ScopeTypeValue.Workspace => "workspace",
+                _ => throw new AnthropicInvalidDataException(
+                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
+                ),
+            },
+            options
+        );
     }
 }

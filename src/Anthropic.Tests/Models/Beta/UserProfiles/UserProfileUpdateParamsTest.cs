@@ -18,10 +18,10 @@ public class UserProfileUpdateParamsTest : TestBase
         {
             UserProfileID = "uprof_011CZkZCu8hGbp5mYRQgUmz9",
             AccessType = UserProfileUpdateParamsAccessType.Application,
-            ExternalID = "user_12345",
+            ExternalID = "x",
             ExternalUserDetails = new()
             {
-                AccountStatus = BetaUserProfileExternalUserDetailsParamsAccountStatus.Active,
+                AccountStatus = BetaUserProfileExternalUserDetailsParamsAccountStatus.Suspended,
                 Country = "country",
                 EmailHash = "x",
                 EntityType = BetaUserProfileExternalUserDetailsParamsEntityType.Individual,
@@ -39,10 +39,10 @@ public class UserProfileUpdateParamsTest : TestBase
         string expectedUserProfileID = "uprof_011CZkZCu8hGbp5mYRQgUmz9";
         ApiEnum<string, UserProfileUpdateParamsAccessType> expectedAccessType =
             UserProfileUpdateParamsAccessType.Application;
-        string expectedExternalID = "user_12345";
+        string expectedExternalID = "x";
         BetaUserProfileExternalUserDetailsParams expectedExternalUserDetails = new()
         {
-            AccountStatus = BetaUserProfileExternalUserDetailsParamsAccountStatus.Active,
+            AccountStatus = BetaUserProfileExternalUserDetailsParamsAccountStatus.Suspended,
             Country = "country",
             EmailHash = "x",
             EntityType = BetaUserProfileExternalUserDetailsParamsEntityType.Individual,
@@ -91,7 +91,7 @@ public class UserProfileUpdateParamsTest : TestBase
         {
             UserProfileID = "uprof_011CZkZCu8hGbp5mYRQgUmz9",
             AccessType = UserProfileUpdateParamsAccessType.Application,
-            ExternalID = "user_12345",
+            ExternalID = "x",
             Name = "x",
         };
 
@@ -114,7 +114,7 @@ public class UserProfileUpdateParamsTest : TestBase
         {
             UserProfileID = "uprof_011CZkZCu8hGbp5mYRQgUmz9",
             AccessType = UserProfileUpdateParamsAccessType.Application,
-            ExternalID = "user_12345",
+            ExternalID = "x",
             Name = "x",
 
             // Null should be interpreted as omitted for these properties
@@ -144,10 +144,10 @@ public class UserProfileUpdateParamsTest : TestBase
         {
             UserProfileID = "uprof_011CZkZCu8hGbp5mYRQgUmz9",
             AccessType = UserProfileUpdateParamsAccessType.Application,
-            ExternalID = "user_12345",
+            ExternalID = "x",
             ExternalUserDetails = new()
             {
-                AccountStatus = BetaUserProfileExternalUserDetailsParamsAccountStatus.Active,
+                AccountStatus = BetaUserProfileExternalUserDetailsParamsAccountStatus.Suspended,
                 Country = "country",
                 EmailHash = "x",
                 EntityType = BetaUserProfileExternalUserDetailsParamsEntityType.Individual,
@@ -190,7 +190,7 @@ public class UserProfileUpdateParamsTest : TestBase
             UserProfileID = "uprof_011CZkZCu8hGbp5mYRQgUmz9",
             ExternalUserDetails = new()
             {
-                AccountStatus = BetaUserProfileExternalUserDetailsParamsAccountStatus.Active,
+                AccountStatus = BetaUserProfileExternalUserDetailsParamsAccountStatus.Suspended,
                 Country = "country",
                 EmailHash = "x",
                 EntityType = BetaUserProfileExternalUserDetailsParamsEntityType.Individual,
@@ -220,7 +220,7 @@ public class UserProfileUpdateParamsTest : TestBase
             UserProfileID = "uprof_011CZkZCu8hGbp5mYRQgUmz9",
             ExternalUserDetails = new()
             {
-                AccountStatus = BetaUserProfileExternalUserDetailsParamsAccountStatus.Active,
+                AccountStatus = BetaUserProfileExternalUserDetailsParamsAccountStatus.Suspended,
                 Country = "country",
                 EmailHash = "x",
                 EntityType = BetaUserProfileExternalUserDetailsParamsEntityType.Individual,
@@ -259,7 +259,7 @@ public class UserProfileUpdateParamsTest : TestBase
         Assert.True(
             TestBase.UrisEqual(
                 new Uri(
-                    "https://api.anthropic.com/v1/user_profiles/uprof_011CZkZCu8hGbp5mYRQgUmz9?beta=true"
+                    "https://api.anthropic.com/v1/user_profiles/uprof_011CZkZCu8hGbp5mYRQgUmz9"
                 ),
                 url
             )
@@ -296,10 +296,10 @@ public class UserProfileUpdateParamsTest : TestBase
         {
             UserProfileID = "uprof_011CZkZCu8hGbp5mYRQgUmz9",
             AccessType = UserProfileUpdateParamsAccessType.Application,
-            ExternalID = "user_12345",
+            ExternalID = "x",
             ExternalUserDetails = new()
             {
-                AccountStatus = BetaUserProfileExternalUserDetailsParamsAccountStatus.Active,
+                AccountStatus = BetaUserProfileExternalUserDetailsParamsAccountStatus.Suspended,
                 Country = "country",
                 EmailHash = "x",
                 EntityType = BetaUserProfileExternalUserDetailsParamsEntityType.Individual,

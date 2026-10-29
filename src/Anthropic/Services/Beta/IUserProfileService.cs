@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Anthropic.Core;
 using Anthropic.Models.Beta.UserProfiles;
+using Anthropic.Services.Beta.UserProfiles;
 
 namespace Anthropic.Services.Beta;
 
@@ -25,6 +26,8 @@ public interface IUserProfileService
     /// <para>The original service is not modified.</para>
     /// </summary>
     IUserProfileService WithOptions(Func<ClientOptions, ClientOptions> modifier);
+
+    IActionUrlService ActionUrls { get; }
 
     /// <summary>
     /// Create User Profile
@@ -73,6 +76,21 @@ public interface IUserProfileService
     );
 
     /// <summary>
+    /// Delete User Profile
+    /// </summary>
+    Task<BetaDeletedUserProfile> Delete(
+        UserProfileDeleteParams parameters,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <inheritdoc cref="Delete(UserProfileDeleteParams, CancellationToken)"/>
+    Task<BetaDeletedUserProfile> Delete(
+        string userProfileID,
+        UserProfileDeleteParams? parameters = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Create Enrollment URL
     /// </summary>
     Task<BetaUserProfileEnrollmentUrl> CreateEnrollmentUrl(
@@ -101,8 +119,10 @@ public interface IUserProfileServiceWithRawResponse
     /// </summary>
     IUserProfileServiceWithRawResponse WithOptions(Func<ClientOptions, ClientOptions> modifier);
 
+    IActionUrlServiceWithRawResponse ActionUrls { get; }
+
     /// <summary>
-    /// Returns a raw HTTP response for <c>post /v1/user_profiles?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>post /v1/user_profiles</c>, but is otherwise the
     /// same as <see cref="IUserProfileService.Create(UserProfileCreateParams?, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<BetaUserProfile>> Create(
@@ -111,7 +131,7 @@ public interface IUserProfileServiceWithRawResponse
     );
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>get /v1/user_profiles/{user_profile_id}?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>get /v1/user_profiles/{user_profile_id}</c>, but is otherwise the
     /// same as <see cref="IUserProfileService.Retrieve(UserProfileRetrieveParams, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<BetaUserProfile>> Retrieve(
@@ -127,7 +147,7 @@ public interface IUserProfileServiceWithRawResponse
     );
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>post /v1/user_profiles/{user_profile_id}?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>post /v1/user_profiles/{user_profile_id}</c>, but is otherwise the
     /// same as <see cref="IUserProfileService.Update(UserProfileUpdateParams, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<BetaUserProfile>> Update(
@@ -143,7 +163,7 @@ public interface IUserProfileServiceWithRawResponse
     );
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>get /v1/user_profiles?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>get /v1/user_profiles</c>, but is otherwise the
     /// same as <see cref="IUserProfileService.List(UserProfileListParams?, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<UserProfileListPage>> List(
@@ -152,7 +172,23 @@ public interface IUserProfileServiceWithRawResponse
     );
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>post /v1/user_profiles/{user_profile_id}/enrollment_url?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>delete /v1/user_profiles/{user_profile_id}</c>, but is otherwise the
+    /// same as <see cref="IUserProfileService.Delete(UserProfileDeleteParams, CancellationToken)"/>.
+    /// </summary>
+    Task<HttpResponse<BetaDeletedUserProfile>> Delete(
+        UserProfileDeleteParams parameters,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <inheritdoc cref="Delete(UserProfileDeleteParams, CancellationToken)"/>
+    Task<HttpResponse<BetaDeletedUserProfile>> Delete(
+        string userProfileID,
+        UserProfileDeleteParams? parameters = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Returns a raw HTTP response for <c>post /v1/user_profiles/{user_profile_id}/enrollment_url</c>, but is otherwise the
     /// same as <see cref="IUserProfileService.CreateEnrollmentUrl(UserProfileCreateEnrollmentUrlParams, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<BetaUserProfileEnrollmentUrl>> CreateEnrollmentUrl(

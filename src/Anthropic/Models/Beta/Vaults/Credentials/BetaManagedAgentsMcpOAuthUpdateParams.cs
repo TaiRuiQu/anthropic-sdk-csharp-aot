@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -5,7 +6,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Anthropic.Core;
 using Anthropic.Exceptions;
-using System = System;
 
 namespace Anthropic.Models.Beta.Vaults.Credentials;
 
@@ -20,20 +20,18 @@ namespace Anthropic.Models.Beta.Vaults.Credentials;
 )]
 public sealed record class BetaManagedAgentsMcpOAuthUpdateParams : JsonModel
 {
-    public required ApiEnum<string, BetaManagedAgentsMcpOAuthUpdateParamsType> Type
+    public JsonElement Type
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullClass<
-                ApiEnum<string, BetaManagedAgentsMcpOAuthUpdateParamsType>
-            >("type");
+            return this._rawData.GetNotNullStruct<JsonElement>("type");
         }
         init { this._rawData.Set("type", value); }
     }
 
     /// <summary>
-    /// Updated OAuth access token.
+    /// The new OAuth access token to replace the stored one.
     /// </summary>
     public string? AccessToken
     {
@@ -46,14 +44,20 @@ public sealed record class BetaManagedAgentsMcpOAuthUpdateParams : JsonModel
     }
 
     /// <summary>
-    /// A timestamp in RFC 3339 format
+    /// When the credential's access token expires, in RFC 3339. Leave it out to keep
+    /// the stored expiry.
+    ///
+    /// <para>If you send a new `access_token`, send its `expires_at` too, or the
+    /// new token keeps the old expiry.</para>
+    ///
+    /// <para>Must be in the future.</para>
     /// </summary>
-    public System::DateTimeOffset? ExpiresAt
+    public DateTimeOffset? ExpiresAt
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNullableStruct<System::DateTimeOffset>("expires_at");
+            return this._rawData.GetNullableStruct<DateTimeOffset>("expires_at");
         }
         init { this._rawData.Set("expires_at", value); }
     }
@@ -76,13 +80,19 @@ public sealed record class BetaManagedAgentsMcpOAuthUpdateParams : JsonModel
     /// <inheritdoc/>
     public override void Validate()
     {
-        this.Type.Validate();
+        if (!JsonElement.DeepEquals(this.Type, JsonSerializer.SerializeToElement("mcp_oauth")))
+        {
+            throw new AnthropicInvalidDataException("Invalid value given for constant");
+        }
         _ = this.AccessToken;
         _ = this.ExpiresAt;
         this.Refresh?.Validate();
     }
 
-    public BetaManagedAgentsMcpOAuthUpdateParams() { }
+    public BetaManagedAgentsMcpOAuthUpdateParams()
+    {
+        this.Type = JsonSerializer.SerializeToElement("mcp_oauth");
+    }
 
 #pragma warning disable CS8618
     [SetsRequiredMembers]
@@ -95,6 +105,8 @@ public sealed record class BetaManagedAgentsMcpOAuthUpdateParams : JsonModel
     public BetaManagedAgentsMcpOAuthUpdateParams(IReadOnlyDictionary<string, JsonElement> rawData)
     {
         this._rawData = new(rawData);
+
+        this.Type = JsonSerializer.SerializeToElement("mcp_oauth");
     }
 
 #pragma warning disable CS8618
@@ -112,15 +124,6 @@ public sealed record class BetaManagedAgentsMcpOAuthUpdateParams : JsonModel
     {
         return new(FrozenDictionary.ToFrozenDictionary(rawData));
     }
-
-    [SetsRequiredMembers]
-    public BetaManagedAgentsMcpOAuthUpdateParams(
-        ApiEnum<string, BetaManagedAgentsMcpOAuthUpdateParamsType> type
-    )
-        : this()
-    {
-        this.Type = type;
-    }
 }
 
 class BetaManagedAgentsMcpOAuthUpdateParamsFromRaw
@@ -130,46 +133,4 @@ class BetaManagedAgentsMcpOAuthUpdateParamsFromRaw
     public BetaManagedAgentsMcpOAuthUpdateParams FromRawUnchecked(
         IReadOnlyDictionary<string, JsonElement> rawData
     ) => BetaManagedAgentsMcpOAuthUpdateParams.FromRawUnchecked(rawData);
-}
-
-[JsonConverter(typeof(BetaManagedAgentsMcpOAuthUpdateParamsTypeConverter))]
-public enum BetaManagedAgentsMcpOAuthUpdateParamsType
-{
-    McpOAuth,
-}
-
-sealed class BetaManagedAgentsMcpOAuthUpdateParamsTypeConverter
-    : JsonConverter<BetaManagedAgentsMcpOAuthUpdateParamsType>
-{
-    public override BetaManagedAgentsMcpOAuthUpdateParamsType Read(
-        ref Utf8JsonReader reader,
-        System::Type typeToConvert,
-        JsonSerializerOptions options
-    )
-    {
-        return JsonSerializer.Deserialize<string>(ref reader, options) switch
-        {
-            "mcp_oauth" => BetaManagedAgentsMcpOAuthUpdateParamsType.McpOAuth,
-            _ => (BetaManagedAgentsMcpOAuthUpdateParamsType)(-1),
-        };
-    }
-
-    public override void Write(
-        Utf8JsonWriter writer,
-        BetaManagedAgentsMcpOAuthUpdateParamsType value,
-        JsonSerializerOptions options
-    )
-    {
-        JsonSerializer.Serialize(
-            writer,
-            value switch
-            {
-                BetaManagedAgentsMcpOAuthUpdateParamsType.McpOAuth => "mcp_oauth",
-                _ => throw new AnthropicInvalidDataException(
-                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
-                ),
-            },
-            options
-        );
-    }
 }

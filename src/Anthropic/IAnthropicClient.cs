@@ -43,8 +43,10 @@ public interface IAnthropicClient : IDisposable
     /// <inheritdoc cref="ClientOptions.OpenTelemetry" />
     OpenTelemetryOptions? OpenTelemetry { get; init; }
 
+    /// <inheritdoc cref="ClientOptions.ApiKey" />
     string? ApiKey { get; init; }
 
+    /// <inheritdoc cref="ClientOptions.AuthToken" />
     string? AuthToken { get; init; }
 
     string? WebhookKey { get; init; }
@@ -69,6 +71,8 @@ public interface IAnthropicClient : IDisposable
     IFileService Files { get; }
 
     ISkillService Skills { get; }
+
+    IUserProfileService UserProfiles { get; }
 
     IOrganizationService Organization { get; }
 
@@ -101,8 +105,10 @@ public interface IAnthropicClientWithRawResponse : IDisposable
     /// <inheritdoc cref="ClientOptions.OpenTelemetry" />
     OpenTelemetryOptions? OpenTelemetry { get; init; }
 
+    /// <inheritdoc cref="ClientOptions.ApiKey" />
     string? ApiKey { get; init; }
 
+    /// <inheritdoc cref="ClientOptions.AuthToken" />
     string? AuthToken { get; init; }
 
     string? WebhookKey { get; init; }
@@ -121,6 +127,8 @@ public interface IAnthropicClientWithRawResponse : IDisposable
     IFileServiceWithRawResponse Files { get; }
 
     ISkillServiceWithRawResponse Skills { get; }
+
+    IUserProfileServiceWithRawResponse UserProfiles { get; }
 
     IOrganizationServiceWithRawResponse Organization { get; }
 

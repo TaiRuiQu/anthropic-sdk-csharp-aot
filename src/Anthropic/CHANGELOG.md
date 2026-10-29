@@ -1,5 +1,106 @@
 # Changelog
 
+## [13.3.0](https://github.com/anthropics/anthropic-sdk-csharp/compare/Anthropic-v13.2.1...Anthropic-v13.3.0) (2026-10-23)
+
+### Features
+
+* **api:** add Claude Tag endpoints for Claude Enterprise organizations
+
+
+### Bug Fixes
+
+* **client:** link the long-request error message to the SDK documentation
+
+### Chores
+
+* **client:** stop sending query params hardcoded in endpoint paths
+* **docs:** improve the descriptions of the code execution tool and its encrypted results
+* **docs:** reword work queue, skill and external key descriptions
+* **docs:** update descriptions of the per-user usage and cost reports
+* **internal:** stop expecting the beta query param in tests
+
+
+### Documentation
+
+* update the README and the example request
+
+## [13.2.1](https://github.com/anthropics/anthropic-sdk-csharp/compare/Anthropic-v13.2.0...Anthropic-v13.2.1) (2026-10-23)
+
+### Chores
+
+* **internal:** carry endpoint path query params to the request layer
+* **internal:** read the beta route qualifier instead of the `beta=true` query
+
+## [13.2.0](https://github.com/anthropics/anthropic-sdk-csharp/compare/Anthropic-v13.1.1...Anthropic-v13.2.0) (2026-10-23)
+
+### Features
+
+* **api:** add support for message threads
+* **api:** add usage and cost reports by dimension, mark older reports legacy
+
+### Bug Fixes
+
+* **tools:** restore the released tool runner behavior when the caller changes its state
+* **tools:** throw again when a stream of the tool runner is not read to its end
+
+### Chores
+
+* **docs:** fix usage and cost report examples and ending_at docs
+
+## [13.1.1](https://github.com/anthropics/anthropic-sdk-csharp/compare/Anthropic-v13.1.0...Anthropic-v13.1.1) (2026-10-22)
+
+### Chores
+
+* **docs:** clarify plugin content scan and validation descriptions
+* **docs:** clarify plugin served_version_pinned and updated_at
+* **docs:** rate limit model lists vary by organization and workspace
+
+## [13.1.0](https://github.com/anthropics/anthropic-sdk-csharp/compare/Anthropic-v13.0.0...Anthropic-v13.1.0) (2026-10-21)
+
+### Features
+
+* **api:** add enforcement status, actions and filter to user profiles
+
+## [13.0.0](https://github.com/anthropics/anthropic-sdk-csharp/compare/Anthropic-v12.60.0...Anthropic-v13.0.0) (2026-10-21)
+
+### ⚠ BREAKING CHANGES
+
+* **api:** add support for new API version 2026-10-21
+
+### Features
+
+* **api:** add a workspace_id filter and the usage_tier scope type to list spend limits
+* **api:** add support for new API version 2026-10-21
+
+
+### Documentation
+
+* **api:** remove outdated system role note from messages description
+
+## [12.60.0](https://github.com/anthropics/anthropic-sdk-csharp/compare/Anthropic-v12.59.0...Anthropic-v12.60.0) (2026-10-20)
+
+### Features
+
+* **api:** add org webhook endpoints and user profile enforcement events
+
+## [12.59.0](https://github.com/anthropics/anthropic-sdk-csharp/compare/Anthropic-v12.58.0...Anthropic-v12.59.0) (2026-10-20)
+
+### Features
+
+* **api:** add data_refreshed_at and has_more to analytics report pages
+* **api:** add workspace rate-limit updates to the Admin API
+* **api:** make User Profiles generally available
+* **client:** yield server-sent events with unrecognized event names
+
+
+### Chores
+
+* **docs:** add credential expiry descriptions to the Managed Agents API reference
+* **docs:** add Messages API request descriptions
+* **docs:** correct plugin manifest_version and reach descriptions
+* **docs:** improve Managed Agents memory store descriptions
+* **docs:** improve Managed Agents vault and credential descriptions
+
 ## [12.58.0](https://github.com/anthropics/anthropic-sdk-csharp/compare/Anthropic-v12.57.0...Anthropic-v12.58.0) (2026-10-15)
 
 ### Features

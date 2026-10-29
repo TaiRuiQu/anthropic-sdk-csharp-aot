@@ -6,7 +6,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Anthropic.Core;
 using Anthropic.Exceptions;
-using System = System;
 
 namespace Anthropic.Models.Beta.Vaults.Credentials;
 
@@ -22,10 +21,12 @@ namespace Anthropic.Models.Beta.Vaults.Credentials;
 public sealed record class BetaManagedAgentsLimitedCredentialNetworkingParams : JsonModel
 {
     /// <summary>
-    /// Hostnames on which the secret will be substituted. Each entry is a bare hostname
-    /// (`api.example.com`), an IPv4 address (`192.0.2.1`), or a `*.`-prefixed wildcard
-    /// (`*.example.com`). URLs, ports, paths, and IPv6 addresses are not accepted.
-    /// At most 16 entries.
+    /// The destination hosts of the outbound requests that the credential's secret
+    /// is substituted into.
+    ///
+    /// <para>Each entry is a bare hostname (`api.example.com`), an IPv4 address
+    /// (`192.0.2.1`), or a `*.` wildcard (`*.example.com`). URLs, ports, paths, and
+    /// IPv6 addresses aren't accepted. The list can have up to 16 entries.</para>
     /// </summary>
     public required IReadOnlyList<string> AllowedHosts
     {
@@ -43,14 +44,12 @@ public sealed record class BetaManagedAgentsLimitedCredentialNetworkingParams : 
         }
     }
 
-    public required ApiEnum<string, BetaManagedAgentsLimitedCredentialNetworkingParamsType> Type
+    public JsonElement Type
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullClass<
-                ApiEnum<string, BetaManagedAgentsLimitedCredentialNetworkingParamsType>
-            >("type");
+            return this._rawData.GetNotNullStruct<JsonElement>("type");
         }
         init { this._rawData.Set("type", value); }
     }
@@ -59,10 +58,16 @@ public sealed record class BetaManagedAgentsLimitedCredentialNetworkingParams : 
     public override void Validate()
     {
         _ = this.AllowedHosts;
-        this.Type.Validate();
+        if (!JsonElement.DeepEquals(this.Type, JsonSerializer.SerializeToElement("limited")))
+        {
+            throw new AnthropicInvalidDataException("Invalid value given for constant");
+        }
     }
 
-    public BetaManagedAgentsLimitedCredentialNetworkingParams() { }
+    public BetaManagedAgentsLimitedCredentialNetworkingParams()
+    {
+        this.Type = JsonSerializer.SerializeToElement("limited");
+    }
 
 #pragma warning disable CS8618
     [SetsRequiredMembers]
@@ -77,6 +82,8 @@ public sealed record class BetaManagedAgentsLimitedCredentialNetworkingParams : 
     )
     {
         this._rawData = new(rawData);
+
+        this.Type = JsonSerializer.SerializeToElement("limited");
     }
 
 #pragma warning disable CS8618
@@ -96,6 +103,13 @@ public sealed record class BetaManagedAgentsLimitedCredentialNetworkingParams : 
     {
         return new(FrozenDictionary.ToFrozenDictionary(rawData));
     }
+
+    [SetsRequiredMembers]
+    public BetaManagedAgentsLimitedCredentialNetworkingParams(IReadOnlyList<string> allowedHosts)
+        : this()
+    {
+        this.AllowedHosts = allowedHosts;
+    }
 }
 
 class BetaManagedAgentsLimitedCredentialNetworkingParamsFromRaw
@@ -105,46 +119,4 @@ class BetaManagedAgentsLimitedCredentialNetworkingParamsFromRaw
     public BetaManagedAgentsLimitedCredentialNetworkingParams FromRawUnchecked(
         IReadOnlyDictionary<string, JsonElement> rawData
     ) => BetaManagedAgentsLimitedCredentialNetworkingParams.FromRawUnchecked(rawData);
-}
-
-[JsonConverter(typeof(BetaManagedAgentsLimitedCredentialNetworkingParamsTypeConverter))]
-public enum BetaManagedAgentsLimitedCredentialNetworkingParamsType
-{
-    Limited,
-}
-
-sealed class BetaManagedAgentsLimitedCredentialNetworkingParamsTypeConverter
-    : JsonConverter<BetaManagedAgentsLimitedCredentialNetworkingParamsType>
-{
-    public override BetaManagedAgentsLimitedCredentialNetworkingParamsType Read(
-        ref Utf8JsonReader reader,
-        System::Type typeToConvert,
-        JsonSerializerOptions options
-    )
-    {
-        return JsonSerializer.Deserialize<string>(ref reader, options) switch
-        {
-            "limited" => BetaManagedAgentsLimitedCredentialNetworkingParamsType.Limited,
-            _ => (BetaManagedAgentsLimitedCredentialNetworkingParamsType)(-1),
-        };
-    }
-
-    public override void Write(
-        Utf8JsonWriter writer,
-        BetaManagedAgentsLimitedCredentialNetworkingParamsType value,
-        JsonSerializerOptions options
-    )
-    {
-        JsonSerializer.Serialize(
-            writer,
-            value switch
-            {
-                BetaManagedAgentsLimitedCredentialNetworkingParamsType.Limited => "limited",
-                _ => throw new AnthropicInvalidDataException(
-                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
-                ),
-            },
-            options
-        );
-    }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -5,7 +6,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Anthropic.Core;
 using Anthropic.Exceptions;
-using System = System;
 
 namespace Anthropic.Models.Beta.Vaults.Credentials;
 
@@ -47,7 +47,8 @@ public sealed record class BetaManagedAgentsCredentialValidation : JsonModel
     }
 
     /// <summary>
-    /// Details of the failing MCP probe step. Null when the probe succeeded.
+    /// Details of the MCP probe step that failed, or `null` if the probe succeeded
+    /// or there was no access token to test.
     /// </summary>
     public required BetaManagedAgentsMcpProbe? McpProbe
     {
@@ -88,14 +89,12 @@ public sealed record class BetaManagedAgentsCredentialValidation : JsonModel
         init { this._rawData.Set("status", value); }
     }
 
-    public required ApiEnum<string, BetaManagedAgentsCredentialValidationType> Type
+    public JsonElement Type
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullClass<
-                ApiEnum<string, BetaManagedAgentsCredentialValidationType>
-            >("type");
+            return this._rawData.GetNotNullStruct<JsonElement>("type");
         }
         init { this._rawData.Set("type", value); }
     }
@@ -103,12 +102,12 @@ public sealed record class BetaManagedAgentsCredentialValidation : JsonModel
     /// <summary>
     /// When the validation probe was performed.
     /// </summary>
-    public required System::DateTimeOffset ValidatedAt
+    public required DateTimeOffset ValidatedAt
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullStruct<System::DateTimeOffset>("validated_at");
+            return this._rawData.GetNotNullStruct<DateTimeOffset>("validated_at");
         }
         init { this._rawData.Set("validated_at", value); }
     }
@@ -134,12 +133,23 @@ public sealed record class BetaManagedAgentsCredentialValidation : JsonModel
         this.McpProbe?.Validate();
         this.Refresh?.Validate();
         this.Status.Validate();
-        this.Type.Validate();
+        if (
+            !JsonElement.DeepEquals(
+                this.Type,
+                JsonSerializer.SerializeToElement("vault_credential_validation")
+            )
+        )
+        {
+            throw new AnthropicInvalidDataException("Invalid value given for constant");
+        }
         _ = this.ValidatedAt;
         _ = this.VaultID;
     }
 
-    public BetaManagedAgentsCredentialValidation() { }
+    public BetaManagedAgentsCredentialValidation()
+    {
+        this.Type = JsonSerializer.SerializeToElement("vault_credential_validation");
+    }
 
 #pragma warning disable CS8618
     [SetsRequiredMembers]
@@ -152,6 +162,8 @@ public sealed record class BetaManagedAgentsCredentialValidation : JsonModel
     public BetaManagedAgentsCredentialValidation(IReadOnlyDictionary<string, JsonElement> rawData)
     {
         this._rawData = new(rawData);
+
+        this.Type = JsonSerializer.SerializeToElement("vault_credential_validation");
     }
 
 #pragma warning disable CS8618
@@ -178,48 +190,4 @@ class BetaManagedAgentsCredentialValidationFromRaw
     public BetaManagedAgentsCredentialValidation FromRawUnchecked(
         IReadOnlyDictionary<string, JsonElement> rawData
     ) => BetaManagedAgentsCredentialValidation.FromRawUnchecked(rawData);
-}
-
-[JsonConverter(typeof(BetaManagedAgentsCredentialValidationTypeConverter))]
-public enum BetaManagedAgentsCredentialValidationType
-{
-    VaultCredentialValidation,
-}
-
-sealed class BetaManagedAgentsCredentialValidationTypeConverter
-    : JsonConverter<BetaManagedAgentsCredentialValidationType>
-{
-    public override BetaManagedAgentsCredentialValidationType Read(
-        ref Utf8JsonReader reader,
-        System::Type typeToConvert,
-        JsonSerializerOptions options
-    )
-    {
-        return JsonSerializer.Deserialize<string>(ref reader, options) switch
-        {
-            "vault_credential_validation" =>
-                BetaManagedAgentsCredentialValidationType.VaultCredentialValidation,
-            _ => (BetaManagedAgentsCredentialValidationType)(-1),
-        };
-    }
-
-    public override void Write(
-        Utf8JsonWriter writer,
-        BetaManagedAgentsCredentialValidationType value,
-        JsonSerializerOptions options
-    )
-    {
-        JsonSerializer.Serialize(
-            writer,
-            value switch
-            {
-                BetaManagedAgentsCredentialValidationType.VaultCredentialValidation =>
-                    "vault_credential_validation",
-                _ => throw new AnthropicInvalidDataException(
-                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
-                ),
-            },
-            options
-        );
-    }
 }

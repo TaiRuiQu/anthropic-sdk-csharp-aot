@@ -145,7 +145,7 @@ public sealed class AnthropicBedrockMantleClient : AnthropicClient
     /// <inheritdoc />
     public override IAnthropicClient WithOptions(Func<ClientOptions, ClientOptions> modifier)
     {
-        return new AnthropicBedrockMantleClient(_awsOptions, modifier(_options));
+        return new AnthropicBedrockMantleClient(_awsOptions, _options.Apply(modifier));
     }
 
     /// <summary>
@@ -175,6 +175,16 @@ public sealed class AnthropicBedrockMantleClient : AnthropicClient
     public new ISkillService Skills =>
         throw new NotSupportedException(
             "The Skills resource is not supported on Bedrock Mantle. "
+                + "Only Messages and Beta.Messages are available."
+        );
+
+    /// <summary>
+    /// Not supported on Bedrock Mantle. Only Messages (and Beta.Messages) are available.
+    /// </summary>
+    /// <exception cref="NotSupportedException">Always thrown.</exception>
+    public new IUserProfileService UserProfiles =>
+        throw new NotSupportedException(
+            "The UserProfiles resource is not supported on Bedrock Mantle. "
                 + "Only Messages and Beta.Messages are available."
         );
 

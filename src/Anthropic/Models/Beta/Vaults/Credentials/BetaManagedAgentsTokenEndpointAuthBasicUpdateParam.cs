@@ -5,7 +5,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Anthropic.Core;
 using Anthropic.Exceptions;
-using System = System;
 
 namespace Anthropic.Models.Beta.Vaults.Credentials;
 
@@ -20,20 +19,22 @@ namespace Anthropic.Models.Beta.Vaults.Credentials;
 )]
 public sealed record class BetaManagedAgentsTokenEndpointAuthBasicUpdateParam : JsonModel
 {
-    public required ApiEnum<string, BetaManagedAgentsTokenEndpointAuthBasicUpdateParamType> Type
+    public JsonElement Type
     {
         get
         {
             this._rawData.Freeze();
-            return this._rawData.GetNotNullClass<
-                ApiEnum<string, BetaManagedAgentsTokenEndpointAuthBasicUpdateParamType>
-            >("type");
+            return this._rawData.GetNotNullStruct<JsonElement>("type");
         }
         init { this._rawData.Set("type", value); }
     }
 
     /// <summary>
-    /// Updated OAuth client secret.
+    /// A new OAuth client secret to replace the stored one.
+    ///
+    /// <para>The credential must already use `client_secret_basic` or `client_secret_post`.
+    /// It keeps its current `token_endpoint_auth` type, even if the `type` sent with
+    /// this secret is the other one.</para>
     /// </summary>
     public string? ClientSecret
     {
@@ -48,11 +49,22 @@ public sealed record class BetaManagedAgentsTokenEndpointAuthBasicUpdateParam : 
     /// <inheritdoc/>
     public override void Validate()
     {
-        this.Type.Validate();
+        if (
+            !JsonElement.DeepEquals(
+                this.Type,
+                JsonSerializer.SerializeToElement("client_secret_basic")
+            )
+        )
+        {
+            throw new AnthropicInvalidDataException("Invalid value given for constant");
+        }
         _ = this.ClientSecret;
     }
 
-    public BetaManagedAgentsTokenEndpointAuthBasicUpdateParam() { }
+    public BetaManagedAgentsTokenEndpointAuthBasicUpdateParam()
+    {
+        this.Type = JsonSerializer.SerializeToElement("client_secret_basic");
+    }
 
 #pragma warning disable CS8618
     [SetsRequiredMembers]
@@ -67,6 +79,8 @@ public sealed record class BetaManagedAgentsTokenEndpointAuthBasicUpdateParam : 
     )
     {
         this._rawData = new(rawData);
+
+        this.Type = JsonSerializer.SerializeToElement("client_secret_basic");
     }
 
 #pragma warning disable CS8618
@@ -86,15 +100,6 @@ public sealed record class BetaManagedAgentsTokenEndpointAuthBasicUpdateParam : 
     {
         return new(FrozenDictionary.ToFrozenDictionary(rawData));
     }
-
-    [SetsRequiredMembers]
-    public BetaManagedAgentsTokenEndpointAuthBasicUpdateParam(
-        ApiEnum<string, BetaManagedAgentsTokenEndpointAuthBasicUpdateParamType> type
-    )
-        : this()
-    {
-        this.Type = type;
-    }
 }
 
 class BetaManagedAgentsTokenEndpointAuthBasicUpdateParamFromRaw
@@ -104,48 +109,4 @@ class BetaManagedAgentsTokenEndpointAuthBasicUpdateParamFromRaw
     public BetaManagedAgentsTokenEndpointAuthBasicUpdateParam FromRawUnchecked(
         IReadOnlyDictionary<string, JsonElement> rawData
     ) => BetaManagedAgentsTokenEndpointAuthBasicUpdateParam.FromRawUnchecked(rawData);
-}
-
-[JsonConverter(typeof(BetaManagedAgentsTokenEndpointAuthBasicUpdateParamTypeConverter))]
-public enum BetaManagedAgentsTokenEndpointAuthBasicUpdateParamType
-{
-    ClientSecretBasic,
-}
-
-sealed class BetaManagedAgentsTokenEndpointAuthBasicUpdateParamTypeConverter
-    : JsonConverter<BetaManagedAgentsTokenEndpointAuthBasicUpdateParamType>
-{
-    public override BetaManagedAgentsTokenEndpointAuthBasicUpdateParamType Read(
-        ref Utf8JsonReader reader,
-        System::Type typeToConvert,
-        JsonSerializerOptions options
-    )
-    {
-        return JsonSerializer.Deserialize<string>(ref reader, options) switch
-        {
-            "client_secret_basic" =>
-                BetaManagedAgentsTokenEndpointAuthBasicUpdateParamType.ClientSecretBasic,
-            _ => (BetaManagedAgentsTokenEndpointAuthBasicUpdateParamType)(-1),
-        };
-    }
-
-    public override void Write(
-        Utf8JsonWriter writer,
-        BetaManagedAgentsTokenEndpointAuthBasicUpdateParamType value,
-        JsonSerializerOptions options
-    )
-    {
-        JsonSerializer.Serialize(
-            writer,
-            value switch
-            {
-                BetaManagedAgentsTokenEndpointAuthBasicUpdateParamType.ClientSecretBasic =>
-                    "client_secret_basic",
-                _ => throw new AnthropicInvalidDataException(
-                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
-                ),
-            },
-            options
-        );
-    }
 }

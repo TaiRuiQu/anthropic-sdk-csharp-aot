@@ -12,11 +12,16 @@ using Anthropic.Exceptions;
 namespace Anthropic.Models.Beta.Organization.Analytics.UsageReport;
 
 /// <summary>
-/// Get token usage over time across a date range.
+/// [Legacy] Get token usage over time across a date range.
 ///
 /// <para>Returns token usage bucketed by minute, hour, or day, optionally broken
-/// down by product, model, context window, inference region, or speed. Available
+/// down by one or more `group_by[]` dimensions, such as product or model. Available
 /// to organizations on a Claude Enterprise plan. Requires an API key with the `read:analytics` scope.</para>
+///
+/// <para>This endpoint is one of the legacy Claude Enterprise usage and cost reports.
+/// For new integrations, use [`GET /v1/organizations/analytics/usage`](/docs/en/api/beta/organization/analytics/usage/list)
+/// in the Usage and Cost Analytics API instead. To move an existing integration,
+/// see [Migrate from the Claude Enterprise usage and cost reports](/docs/en/manage-claude/usage-cost-analytics-api#migrate-from-enterprise-analytics-reports).</para>
 ///
 /// <para>NOTE: Do not inherit from this type outside the SDK unless you're okay with
 /// breaking changes in non-major versions. We may add new methods in the future that
@@ -416,12 +421,11 @@ public record class UsageReportListParams : ParamsBase
 
     public override Uri Url(ClientOptions options)
     {
-        var queryString = this.QueryString(options);
         return new UriBuilder(
             options.BaseUrl.ToString().TrimEnd('/') + "/v1/organizations/analytics/usage_report"
         )
         {
-            Query = string.IsNullOrEmpty(queryString) ? "beta=true" : ("beta=true&" + queryString),
+            Query = this.QueryString(options),
         }.Uri;
     }
 

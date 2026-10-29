@@ -43,3 +43,7 @@ $ ./scripts/test
 ## Publishing
 
 See [docs/PUBLISHING.md](./docs/PUBLISHING.md).
+
+## License
+
+By contributing to this repository, you agree that your contributions are licensed under the Apache License, Version 2.0 (see [LICENSE](LICENSE)).

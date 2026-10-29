@@ -393,7 +393,6 @@ public record class AgentUpdateParams : ParamsBase
 
     public override System::Uri Url(ClientOptions options)
     {
-        var queryString = this.QueryString(options);
         return new System::UriBuilder(
             options.BaseUrl.ToString().TrimEnd('/')
                 + string.Format(
@@ -402,7 +401,7 @@ public record class AgentUpdateParams : ParamsBase
                 )
         )
         {
-            Query = string.IsNullOrEmpty(queryString) ? "beta=true" : ("beta=true&" + queryString),
+            Query = this.QueryString(options),
         }.Uri;
     }
 
@@ -737,6 +736,23 @@ public record class AgentUpdateParamsTool : ModelBase
                 this.Value,
                 ModelBase.SerializerOptions
             );
+        }
+    }
+
+    public ApiEnum<string, AgentUpdateParamsToolType> Type
+    {
+        get
+        {
+            return this.Value switch
+            {
+                BetaManagedAgentsAgentToolset20260401Params _ =>
+                    AgentUpdateParamsToolType.AgentToolset20260401,
+                BetaManagedAgentsMcpToolsetParams _ => AgentUpdateParamsToolType.McpToolset,
+                BetaManagedAgentsCustomToolParams _ => AgentUpdateParamsToolType.Custom,
+                _ => WrappedJsonSerializer.GetNotNullClassProperty<
+                    ApiEnum<string, AgentUpdateParamsToolType>
+                >(this.Json, "type"),
+            };
         }
     }
 
@@ -1093,5 +1109,52 @@ sealed class AgentUpdateParamsToolConverter : JsonConverter<AgentUpdateParamsToo
     )
     {
         JsonSerializer.Serialize(writer, value.Json, options);
+    }
+}
+
+[JsonConverter(typeof(AgentUpdateParamsToolTypeConverter))]
+public enum AgentUpdateParamsToolType
+{
+    AgentToolset20260401,
+    McpToolset,
+    Custom,
+}
+
+sealed class AgentUpdateParamsToolTypeConverter : JsonConverter<AgentUpdateParamsToolType>
+{
+    public override AgentUpdateParamsToolType Read(
+        ref Utf8JsonReader reader,
+        System::Type typeToConvert,
+        JsonSerializerOptions options
+    )
+    {
+        return JsonSerializer.Deserialize<string>(ref reader, options) switch
+        {
+            "agent_toolset_20260401" => AgentUpdateParamsToolType.AgentToolset20260401,
+            "mcp_toolset" => AgentUpdateParamsToolType.McpToolset,
+            "custom" => AgentUpdateParamsToolType.Custom,
+            _ => (AgentUpdateParamsToolType)(-1),
+        };
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        AgentUpdateParamsToolType value,
+        JsonSerializerOptions options
+    )
+    {
+        JsonSerializer.Serialize(
+            writer,
+            value switch
+            {
+                AgentUpdateParamsToolType.AgentToolset20260401 => "agent_toolset_20260401",
+                AgentUpdateParamsToolType.McpToolset => "mcp_toolset",
+                AgentUpdateParamsToolType.Custom => "custom",
+                _ => throw new AnthropicInvalidDataException(
+                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
+                ),
+            },
+            options
+        );
     }
 }

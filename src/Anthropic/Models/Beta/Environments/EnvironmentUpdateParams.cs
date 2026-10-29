@@ -256,7 +256,6 @@ public record class EnvironmentUpdateParams : ParamsBase
 
     public override System::Uri Url(ClientOptions options)
     {
-        var queryString = this.QueryString(options);
         return new System::UriBuilder(
             options.BaseUrl.ToString().TrimEnd('/')
                 + string.Format(
@@ -265,7 +264,7 @@ public record class EnvironmentUpdateParams : ParamsBase
                 )
         )
         {
-            Query = string.IsNullOrEmpty(queryString) ? "beta=true" : ("beta=true&" + queryString),
+            Query = this.QueryString(options),
         }.Uri;
     }
 
@@ -317,15 +316,17 @@ public record class EnvironmentUpdateParamsConfig : ModelBase
         }
     }
 
-    public JsonElement Type
+    public ApiEnum<string, EnvironmentUpdateParamsConfigType> Type
     {
         get
         {
             return this.Value switch
             {
-                BetaCloudConfigParams x => x.Type,
-                BetaSelfHostedConfigParams x => x.Type,
-                _ => WrappedJsonSerializer.GetNotNullStructProperty<JsonElement>(this.Json, "type"),
+                BetaCloudConfigParams _ => EnvironmentUpdateParamsConfigType.Cloud,
+                BetaSelfHostedConfigParams _ => EnvironmentUpdateParamsConfigType.SelfHosted,
+                _ => WrappedJsonSerializer.GetNotNullClassProperty<
+                    ApiEnum<string, EnvironmentUpdateParamsConfigType>
+                >(this.Json, "type"),
             };
         }
     }
@@ -603,6 +604,51 @@ sealed class EnvironmentUpdateParamsConfigConverter : JsonConverter<EnvironmentU
     )
     {
         JsonSerializer.Serialize(writer, value?.Json, options);
+    }
+}
+
+[JsonConverter(typeof(EnvironmentUpdateParamsConfigTypeConverter))]
+public enum EnvironmentUpdateParamsConfigType
+{
+    Cloud,
+    SelfHosted,
+}
+
+sealed class EnvironmentUpdateParamsConfigTypeConverter
+    : JsonConverter<EnvironmentUpdateParamsConfigType>
+{
+    public override EnvironmentUpdateParamsConfigType Read(
+        ref Utf8JsonReader reader,
+        System::Type typeToConvert,
+        JsonSerializerOptions options
+    )
+    {
+        return JsonSerializer.Deserialize<string>(ref reader, options) switch
+        {
+            "cloud" => EnvironmentUpdateParamsConfigType.Cloud,
+            "self_hosted" => EnvironmentUpdateParamsConfigType.SelfHosted,
+            _ => (EnvironmentUpdateParamsConfigType)(-1),
+        };
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        EnvironmentUpdateParamsConfigType value,
+        JsonSerializerOptions options
+    )
+    {
+        JsonSerializer.Serialize(
+            writer,
+            value switch
+            {
+                EnvironmentUpdateParamsConfigType.Cloud => "cloud",
+                EnvironmentUpdateParamsConfigType.SelfHosted => "self_hosted",
+                _ => throw new AnthropicInvalidDataException(
+                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
+                ),
+            },
+            options
+        );
     }
 }
 

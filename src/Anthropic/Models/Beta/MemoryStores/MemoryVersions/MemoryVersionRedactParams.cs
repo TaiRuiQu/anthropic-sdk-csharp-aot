@@ -11,7 +11,7 @@ using Anthropic.Services.Beta.MemoryStores;
 namespace Anthropic.Models.Beta.MemoryStores.MemoryVersions;
 
 /// <summary>
-/// Redact a memory version
+/// Redact a Memory Version
 ///
 /// <para>NOTE: Do not inherit from this type outside the SDK unless you're okay with
 /// breaking changes in non-major versions. We may add new methods in the future that
@@ -165,7 +165,6 @@ public record class MemoryVersionRedactParams : ParamsBase
 
     public override Uri Url(ClientOptions options)
     {
-        var queryString = this.QueryString(options);
         return new UriBuilder(
             options.BaseUrl.ToString().TrimEnd('/')
                 + string.Format(
@@ -175,7 +174,7 @@ public record class MemoryVersionRedactParams : ParamsBase
                 )
         )
         {
-            Query = string.IsNullOrEmpty(queryString) ? "beta=true" : ("beta=true&" + queryString),
+            Query = this.QueryString(options),
         }.Uri;
     }
 

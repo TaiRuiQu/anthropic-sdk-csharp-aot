@@ -356,10 +356,9 @@ public record class AgentCreateParams : ParamsBase
 
     public override System::Uri Url(ClientOptions options)
     {
-        var queryString = this.QueryString(options);
         return new System::UriBuilder(options.BaseUrl.ToString().TrimEnd('/') + "/v1/agents")
         {
-            Query = string.IsNullOrEmpty(queryString) ? "beta=true" : ("beta=true&" + queryString),
+            Query = this.QueryString(options),
         }.Uri;
     }
 
@@ -674,6 +673,23 @@ public record class Tool : ModelBase
                 this.Value,
                 ModelBase.SerializerOptions
             );
+        }
+    }
+
+    public ApiEnum<string, ToolType> Type
+    {
+        get
+        {
+            return this.Value switch
+            {
+                BetaManagedAgentsAgentToolset20260401Params _ => ToolType.AgentToolset20260401,
+                BetaManagedAgentsMcpToolsetParams _ => ToolType.McpToolset,
+                BetaManagedAgentsCustomToolParams _ => ToolType.Custom,
+                _ => WrappedJsonSerializer.GetNotNullClassProperty<ApiEnum<string, ToolType>>(
+                    this.Json,
+                    "type"
+                ),
+            };
         }
     }
 
@@ -1006,5 +1022,48 @@ sealed class ToolConverter : JsonConverter<Tool>
     public override void Write(Utf8JsonWriter writer, Tool value, JsonSerializerOptions options)
     {
         JsonSerializer.Serialize(writer, value.Json, options);
+    }
+}
+
+[JsonConverter(typeof(ToolTypeConverter))]
+public enum ToolType
+{
+    AgentToolset20260401,
+    McpToolset,
+    Custom,
+}
+
+sealed class ToolTypeConverter : JsonConverter<ToolType>
+{
+    public override ToolType Read(
+        ref Utf8JsonReader reader,
+        System::Type typeToConvert,
+        JsonSerializerOptions options
+    )
+    {
+        return JsonSerializer.Deserialize<string>(ref reader, options) switch
+        {
+            "agent_toolset_20260401" => ToolType.AgentToolset20260401,
+            "mcp_toolset" => ToolType.McpToolset,
+            "custom" => ToolType.Custom,
+            _ => (ToolType)(-1),
+        };
+    }
+
+    public override void Write(Utf8JsonWriter writer, ToolType value, JsonSerializerOptions options)
+    {
+        JsonSerializer.Serialize(
+            writer,
+            value switch
+            {
+                ToolType.AgentToolset20260401 => "agent_toolset_20260401",
+                ToolType.McpToolset => "mcp_toolset",
+                ToolType.Custom => "custom",
+                _ => throw new AnthropicInvalidDataException(
+                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
+                ),
+            },
+            options
+        );
     }
 }

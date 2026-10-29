@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -10,7 +11,6 @@ using Anthropic.Core;
 using Anthropic.Exceptions;
 using Anthropic.Services.Beta;
 using Sessions = Anthropic.Models.Beta.Sessions;
-using System = System;
 
 namespace Anthropic.Models.Beta.Deployments;
 
@@ -349,12 +349,11 @@ public record class DeploymentCreateParams : ParamsBase
             && this._rawBodyData.Equals(other._rawBodyData);
     }
 
-    public override System::Uri Url(ClientOptions options)
+    public override Uri Url(ClientOptions options)
     {
-        var queryString = this.QueryString(options);
-        return new System::UriBuilder(options.BaseUrl.ToString().TrimEnd('/') + "/v1/deployments")
+        return new UriBuilder(options.BaseUrl.ToString().TrimEnd('/') + "/v1/deployments")
         {
-            Query = string.IsNullOrEmpty(queryString) ? "beta=true" : ("beta=true&" + queryString),
+            Query = this.QueryString(options),
         }.Uri;
     }
 
@@ -490,8 +489,8 @@ public record class Agent : ModelBase
     /// </example>
     /// </summary>
     public void Switch(
-        System::Action<string> @string,
-        System::Action<Sessions::BetaManagedAgentsAgentParams> betaManagedAgentsAgentParams
+        Action<string> @string,
+        Action<Sessions::BetaManagedAgentsAgentParams> betaManagedAgentsAgentParams
     )
     {
         switch (this.Value)
@@ -529,8 +528,8 @@ public record class Agent : ModelBase
     /// </example>
     /// </summary>
     public T Match<T>(
-        System::Func<string, T> @string,
-        System::Func<Sessions::BetaManagedAgentsAgentParams, T> betaManagedAgentsAgentParams
+        Func<string, T> @string,
+        Func<Sessions::BetaManagedAgentsAgentParams, T> betaManagedAgentsAgentParams
     )
     {
         return this.Value switch
@@ -599,7 +598,7 @@ sealed class AgentConverter : JsonConverter<Agent>
 {
     public override Agent? Read(
         ref Utf8JsonReader reader,
-        System::Type typeToConvert,
+        Type typeToConvert,
         JsonSerializerOptions options
     )
     {
@@ -616,7 +615,7 @@ sealed class AgentConverter : JsonConverter<Agent>
                 return new(deserialized, element);
             }
         }
-        catch (System::Exception e) when (e is JsonException || e is AnthropicInvalidDataException)
+        catch (Exception e) when (e is JsonException || e is AnthropicInvalidDataException)
         {
             // ignore
         }
@@ -629,7 +628,7 @@ sealed class AgentConverter : JsonConverter<Agent>
                 return new(deserialized, element);
             }
         }
-        catch (System::Exception e) when (e is JsonException || e is AnthropicInvalidDataException)
+        catch (Exception e) when (e is JsonException || e is AnthropicInvalidDataException)
         {
             // ignore
         }
@@ -661,6 +660,24 @@ public record class Resource : ModelBase
                 this.Value,
                 ModelBase.SerializerOptions
             );
+        }
+    }
+
+    public ApiEnum<string, ResourceType> Type
+    {
+        get
+        {
+            return this.Value switch
+            {
+                Sessions::BetaManagedAgentsGitHubRepositoryResourceParams _ =>
+                    ResourceType.GitHubRepository,
+                Sessions::BetaManagedAgentsFileResourceParams _ => ResourceType.File,
+                Sessions::BetaManagedAgentsMemoryStoreResourceParam _ => ResourceType.MemoryStore,
+                _ => WrappedJsonSerializer.GetNotNullClassProperty<ApiEnum<string, ResourceType>>(
+                    this.Json,
+                    "type"
+                ),
+            };
         }
     }
 
@@ -804,9 +821,9 @@ public record class Resource : ModelBase
     /// </example>
     /// </summary>
     public void Switch(
-        System::Action<Sessions::BetaManagedAgentsGitHubRepositoryResourceParams> betaManagedAgentsGitHubRepositoryResourceParams,
-        System::Action<Sessions::BetaManagedAgentsFileResourceParams> betaManagedAgentsFileResourceParams,
-        System::Action<Sessions::BetaManagedAgentsMemoryStoreResourceParam> betaManagedAgentsMemoryStoreResourceParam
+        Action<Sessions::BetaManagedAgentsGitHubRepositoryResourceParams> betaManagedAgentsGitHubRepositoryResourceParams,
+        Action<Sessions::BetaManagedAgentsFileResourceParams> betaManagedAgentsFileResourceParams,
+        Action<Sessions::BetaManagedAgentsMemoryStoreResourceParam> betaManagedAgentsMemoryStoreResourceParam
     )
     {
         switch (this.Value)
@@ -850,15 +867,12 @@ public record class Resource : ModelBase
     /// </example>
     /// </summary>
     public T Match<T>(
-        System::Func<
+        Func<
             Sessions::BetaManagedAgentsGitHubRepositoryResourceParams,
             T
         > betaManagedAgentsGitHubRepositoryResourceParams,
-        System::Func<
-            Sessions::BetaManagedAgentsFileResourceParams,
-            T
-        > betaManagedAgentsFileResourceParams,
-        System::Func<
+        Func<Sessions::BetaManagedAgentsFileResourceParams, T> betaManagedAgentsFileResourceParams,
+        Func<
             Sessions::BetaManagedAgentsMemoryStoreResourceParam,
             T
         > betaManagedAgentsMemoryStoreResourceParam
@@ -946,7 +960,7 @@ sealed class ResourceConverter : JsonConverter<Resource>
 {
     public override Resource? Read(
         ref Utf8JsonReader reader,
-        System::Type typeToConvert,
+        Type typeToConvert,
         JsonSerializerOptions options
     )
     {
@@ -1036,5 +1050,52 @@ sealed class ResourceConverter : JsonConverter<Resource>
     public override void Write(Utf8JsonWriter writer, Resource value, JsonSerializerOptions options)
     {
         JsonSerializer.Serialize(writer, value.Json, options);
+    }
+}
+
+[JsonConverter(typeof(ResourceTypeConverter))]
+public enum ResourceType
+{
+    GitHubRepository,
+    File,
+    MemoryStore,
+}
+
+sealed class ResourceTypeConverter : JsonConverter<ResourceType>
+{
+    public override ResourceType Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options
+    )
+    {
+        return JsonSerializer.Deserialize<string>(ref reader, options) switch
+        {
+            "github_repository" => ResourceType.GitHubRepository,
+            "file" => ResourceType.File,
+            "memory_store" => ResourceType.MemoryStore,
+            _ => (ResourceType)(-1),
+        };
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        ResourceType value,
+        JsonSerializerOptions options
+    )
+    {
+        JsonSerializer.Serialize(
+            writer,
+            value switch
+            {
+                ResourceType.GitHubRepository => "github_repository",
+                ResourceType.File => "file",
+                ResourceType.MemoryStore => "memory_store",
+                _ => throw new AnthropicInvalidDataException(
+                    string.Format("Invalid value '{0}' in {1}", value, nameof(value))
+                ),
+            },
+            options
+        );
     }
 }

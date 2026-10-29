@@ -30,7 +30,7 @@ public interface IVaultService
     ICredentialService Credentials { get; }
 
     /// <summary>
-    /// Create Vault
+    /// Create a Vault
     /// </summary>
     Task<BetaManagedAgentsVault> Create(
         VaultCreateParams parameters,
@@ -38,7 +38,7 @@ public interface IVaultService
     );
 
     /// <summary>
-    /// Get Vault
+    /// Retrieve a Vault
     /// </summary>
     Task<BetaManagedAgentsVault> Retrieve(
         VaultRetrieveParams parameters,
@@ -53,7 +53,7 @@ public interface IVaultService
     );
 
     /// <summary>
-    /// Update Vault
+    /// Update a Vault
     /// </summary>
     Task<BetaManagedAgentsVault> Update(
         VaultUpdateParams parameters,
@@ -76,7 +76,7 @@ public interface IVaultService
     );
 
     /// <summary>
-    /// Delete Vault
+    /// Delete a Vault
     /// </summary>
     Task<BetaManagedAgentsDeletedVault> Delete(
         VaultDeleteParams parameters,
@@ -91,7 +91,7 @@ public interface IVaultService
     );
 
     /// <summary>
-    /// Archive Vault
+    /// Archive a Vault
     /// </summary>
     Task<BetaManagedAgentsVault> Archive(
         VaultArchiveParams parameters,
@@ -122,7 +122,7 @@ public interface IVaultServiceWithRawResponse
     ICredentialServiceWithRawResponse Credentials { get; }
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>post /v1/vaults?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>post /v1/vaults</c>, but is otherwise the
     /// same as <see cref="IVaultService.Create(VaultCreateParams, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<BetaManagedAgentsVault>> Create(
@@ -131,7 +131,7 @@ public interface IVaultServiceWithRawResponse
     );
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>get /v1/vaults/{vault_id}?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>get /v1/vaults/{vault_id}</c>, but is otherwise the
     /// same as <see cref="IVaultService.Retrieve(VaultRetrieveParams, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<BetaManagedAgentsVault>> Retrieve(
@@ -147,7 +147,7 @@ public interface IVaultServiceWithRawResponse
     );
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>post /v1/vaults/{vault_id}?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>post /v1/vaults/{vault_id}</c>, but is otherwise the
     /// same as <see cref="IVaultService.Update(VaultUpdateParams, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<BetaManagedAgentsVault>> Update(
@@ -163,7 +163,7 @@ public interface IVaultServiceWithRawResponse
     );
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>get /v1/vaults?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>get /v1/vaults</c>, but is otherwise the
     /// same as <see cref="IVaultService.List(VaultListParams?, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<VaultListPage>> List(
@@ -172,7 +172,7 @@ public interface IVaultServiceWithRawResponse
     );
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>delete /v1/vaults/{vault_id}?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>delete /v1/vaults/{vault_id}</c>, but is otherwise the
     /// same as <see cref="IVaultService.Delete(VaultDeleteParams, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<BetaManagedAgentsDeletedVault>> Delete(
@@ -188,7 +188,7 @@ public interface IVaultServiceWithRawResponse
     );
 
     /// <summary>
-    /// Returns a raw HTTP response for <c>post /v1/vaults/{vault_id}/archive?beta=true</c>, but is otherwise the
+    /// Returns a raw HTTP response for <c>post /v1/vaults/{vault_id}/archive</c>, but is otherwise the
     /// same as <see cref="IVaultService.Archive(VaultArchiveParams, CancellationToken)"/>.
     /// </summary>
     Task<HttpResponse<BetaManagedAgentsVault>> Archive(
