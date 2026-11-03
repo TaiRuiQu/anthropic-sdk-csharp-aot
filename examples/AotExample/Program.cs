@@ -20,7 +20,7 @@ var message = await client.Messages.Create(
     new MessageCreateParams
     {
         MaxTokens = 128,
-        Messages = [new MessageParam { Role = "user", Content = "Hello" }],
+        Messages = [new UserMessageParam("Hello")],
         Model = "claude-sonnet-4-5",
     }
 );
@@ -34,7 +34,7 @@ await foreach (
         new MessageCreateParams
         {
             MaxTokens = 128,
-            Messages = [new MessageParam { Role = "user", Content = "Stream" }],
+            Messages = [new UserMessageParam("Stream")],
             Model = "claude-sonnet-4-5",
         }
     )
