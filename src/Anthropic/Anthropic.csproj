@@ -4,7 +4,7 @@
     <AssemblyTitle>Claude SDK for C#</AssemblyTitle>
     <AssemblyName>Anthropic</AssemblyName>
     <PackageId>TairuiQu.Anthropic.Aot</PackageId>
-    <VersionPrefix>13.3.0-aot.1</VersionPrefix>
+    <VersionPrefix>13.4.0-aot.1</VersionPrefix>
     <StainlessMainProject>true</StainlessMainProject>
     <Description>Unofficial Native AOT-enabled fork of the Anthropic .NET SDK. Not affiliated with or endorsed by Anthropic.</Description>
     <OutputType>Library</OutputType>
